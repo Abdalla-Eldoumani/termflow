@@ -55,6 +55,10 @@ fn run_app(
                             app.input_buffer.clear();
                         }
                         KeyCode::Char('d') => app.delete_selected_task(),
+                        KeyCode::Char('/') => {
+                            app.input_mode = InputMode::Search;
+                            app.input_buffer.clear();
+                        }
                         KeyCode::Char(' ') => app.toggle_selected_task_status(),
                         KeyCode::Up | KeyCode::Char('k') => app.move_selection_up(),
                         KeyCode::Down | KeyCode::Char('j') => app.move_selection_down(),
@@ -84,6 +88,18 @@ fn run_app(
                         KeyCode::Esc => {
                             app.input_mode = InputMode::Normal;
                             app.input_buffer.clear();
+                            app.update_filtered_tasks();
+                        }
+                        KeyCode::Enter => {
+                            app.input_mode = InputMode::Normal;
+                        }
+                        KeyCode::Char(c) => {
+                            app.input_buffer.push(c);
+                            app.search_tasks(&app.input_buffer.clone());
+                        }
+                        KeyCode::Backspace => {
+                            app.input_buffer.pop();
+                            app.search_tasks(&app.input_buffer.clone());
                         }
                         _ => {}
                     },
