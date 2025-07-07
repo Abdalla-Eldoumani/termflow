@@ -74,6 +74,58 @@ impl App {
         self.update_filtered_tasks();
     }
 
+    pub fn delete_selected_task(&mut self) {
+        if let Some(selected_idx) = self.selected_task {
+            if let Some(task_id) = self.filtered_tasks.get(selected_idx).copied() {
+                self.tasks.remove(&task_id);
+                self.update_filtered_tasks();
+                
+                if self.filtered_tasks.is_empty() {
+                    self.selected_task = None;
+                } else if selected_idx >= self.filtered_tasks.len() {
+                    self.selected_task = Some(self.filtered_tasks.len() - 1);
+                }
+            }
+        }
+    }
+
+    pub fn search_tasks(&mut self, query: &str) {
+        if query.is_empty() {
+            self.update_filtered_tasks();
+            return;
+        }
+
+        let query_lower = query.to_lowercase();
+        let mut filtered: Vec<_> = self.tasks
+            .values()
+            .filter(|task| {
+                task.title.to_lowercase().contains(&query_lower) ||
+                task.description
+                    .as_ref()
+                    .map(|desc| desc.to_lowercase().contains(&query_lower))
+                    .unwrap_or(false)
+            })
+            .collect();
+
+        filtered.sort_by(|a, b| {
+            match (&a.priority, &b.priority) {
+                (Priority::High, Priority::High) => a.created_at.cmp(&b.created_at),
+                (Priority::High, _) => std::cmp::Ordering::Less,
+                (_, Priority::High) => std::cmp::Ordering::Greater,
+                (Priority::Medium, Priority::Medium) => a.created_at.cmp(&b.created_at),
+                (Priority::Medium, Priority::Low) => std::cmp::Ordering::Less,
+                (Priority::Low, Priority::Medium) => std::cmp::Ordering::Greater,
+                (Priority::Low, Priority::Low) => a.created_at.cmp(&b.created_at),
+            }
+        });
+
+        self.filtered_tasks = filtered.iter().map(|t| t.id).collect();
+        
+        if self.selected_task.map(|idx| idx >= self.filtered_tasks.len()).unwrap_or(false) {
+            self.selected_task = if self.filtered_tasks.is_empty() { None } else { Some(0) };
+        }
+    }
+
     pub fn get_selected_task(&self) -> Option<&Task> {
         self.selected_task
             .and_then(|idx| self.filtered_tasks.get(idx))
