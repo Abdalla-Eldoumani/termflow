@@ -93,7 +93,7 @@ fn draw_category_popup(f: &mut Frame, app: &App) {
             Span::raw(format!("{} ", cat.icon())),
             Span::styled(format!("{:?}", cat), style.fg(cat.color())),
             Span::raw(" - "),
-            Span::styled(desc, Style::default().fg(Color::Gray)),
+            Span::styled(*desc, Style::default().fg(Color::Gray)),
         ])).style(style);
         
         items.push(item);
