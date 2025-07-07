@@ -94,7 +94,7 @@ impl App {
             self.update_filtered_tasks();
             return;
         }
-
+        
         let query_lower = query.to_lowercase();
         let mut filtered: Vec<_> = self.tasks
             .values()
@@ -106,7 +106,7 @@ impl App {
                     .unwrap_or(false)
             })
             .collect();
-
+    
         filtered.sort_by(|a, b| {
             match (&a.priority, &b.priority) {
                 (Priority::High, Priority::High) => a.created_at.cmp(&b.created_at),
@@ -118,7 +118,7 @@ impl App {
                 (Priority::Low, Priority::Low) => a.created_at.cmp(&b.created_at),
             }
         });
-
+    
         self.filtered_tasks = filtered.iter().map(|t| t.id).collect();
         
         if self.selected_task.map(|idx| idx >= self.filtered_tasks.len()).unwrap_or(false) {
