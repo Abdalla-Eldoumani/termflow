@@ -1,5 +1,4 @@
 use ratatui::{
-    backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
@@ -12,7 +11,7 @@ use crate::{
     models::{TaskStatus, Priority},
 };
 
-pub fn draw<B: Backend>(f: &mut Frame<B>, app: &App) {
+pub fn draw(f: &mut Frame, app: &App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(1)
@@ -32,7 +31,7 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, app: &App) {
     }
 }
 
-fn draw_title<B: Backend>(f: &mut Frame<B>, area: Rect) {
+fn draw_title(f: &mut Frame, area: Rect) {
     let title = Paragraph::new("TermFlow - Terminal Productivity Suite")
         .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
         .alignment(Alignment::Center)
@@ -40,7 +39,7 @@ fn draw_title<B: Backend>(f: &mut Frame<B>, area: Rect) {
     f.render_widget(title, area);
 }
 
-fn draw_task_list<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
+fn draw_task_list(f: &mut Frame, app: &App, area: Rect) {
     let tasks: Vec<ListItem> = app
         .filtered_tasks
         .iter()
@@ -84,7 +83,7 @@ fn draw_task_list<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
     f.render_widget(tasks_list, area);
 }
 
-fn draw_status_bar<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
+fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
     let mode = match app.input_mode {
         InputMode::Normal => "NORMAL",
         InputMode::Insert => "INSERT",
@@ -104,10 +103,10 @@ fn draw_status_bar<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
     f.render_widget(status, area);
 }
 
-fn draw_input_popup<B: Backend>(f: &mut Frame<B>, app: &App) {
+fn draw_input_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(60, 20, f.size());
     
-    let popup = Paragraph::new(app.input_buffer.as_ref())
+    let popup = Paragraph::new(app.input_buffer.as_str())
         .style(Style::default().fg(Color::White))
         .block(
             Block::default()

@@ -14,18 +14,15 @@ use std::{io, time::Duration};
 use crate::app::{App, InputMode};
 
 fn main() -> Result<()> {
-    // Setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    // Create app and run
     let app = App::new();
     let res = run_app(&mut terminal, app);
 
-    // Restore terminal
     disable_raw_mode()?;
     execute!(
         terminal.backend_mut(),
@@ -41,8 +38,8 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn run_app<B: ratatui::backend::Backend>(
-    terminal: &mut Terminal<B>,
+fn run_app(
+    terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     mut app: App,
 ) -> Result<()> {
     loop {
@@ -69,16 +66,7 @@ fn run_app<B: ratatui::backend::Backend>(
                         }
                         KeyCode::Enter => {
                             if !app.input_buffer.trim().is_empty() {
-                                app.add_task(app.input_buffer.drain(..).collect());
-                                app.input_mode = InputMode::Normal;
-                            }
-                        }
-                        KeyCode::Char(c) => {
-                            app.input_buffer.push(c);
-                        }
-                        KeyCode::Enter => {
-                            if !app.input_buffer.trim().is_empty() {
-                                app.add_task(app.input_buffer.drain(..).collect());
+                                app.add_task(app.input_buffer.clone());
                                 app.input_mode = InputMode::Normal;
                             }
                         }
@@ -95,7 +83,6 @@ fn run_app<B: ratatui::backend::Backend>(
                             app.input_mode = InputMode::Normal;
                             app.input_buffer.clear();
                         }
-                        // We'll implement search functionality later
                         _ => {}
                     },
                 }
