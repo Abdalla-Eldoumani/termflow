@@ -69,6 +69,9 @@ fn run_app(
                         _ => {}
                     },
                     InputMode::Insert => match key.code {
+                        KeyCode::Tab => {
+                            app.input_mode = InputMode::SelectCategory;
+                        }
                         KeyCode::Esc => {
                             app.input_mode = InputMode::Normal;
                             app.input_buffer.clear();
@@ -85,6 +88,18 @@ fn run_app(
                         }
                         KeyCode::Backspace => {
                             app.input_buffer.pop();
+                        }
+                        _ => {}
+                    },
+                    InputMode::SelectCategory => match key.code {
+                        KeyCode::Tab => {
+                            app.cycle_category();
+                        }
+                        KeyCode::Enter => {
+                            app.input_mode = InputMode::Insert;
+                        }
+                        KeyCode::Esc => {
+                            app.input_mode = InputMode::Insert;
                         }
                         _ => {}
                     },
