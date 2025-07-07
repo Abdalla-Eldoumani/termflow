@@ -4,7 +4,7 @@ mod ui;
 
 use anyhow::Result;
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -47,6 +47,10 @@ fn run_app(
 
         if crossterm::event::poll(Duration::from_millis(250))? {
             if let Event::Key(key) = event::read()? {
+                if key.kind != KeyEventKind::Press {
+                    continue;
+                }
+                
                 match app.input_mode {
                     InputMode::Normal => match key.code {
                         KeyCode::Char('q') => app.should_quit = true,
@@ -95,11 +99,13 @@ fn run_app(
                         }
                         KeyCode::Char(c) => {
                             app.input_buffer.push(c);
-                            app.search_tasks(&app.input_buffer.clone());
+                            let query = app.input_buffer.clone();
+                            app.search_tasks(&query);
                         }
                         KeyCode::Backspace => {
                             app.input_buffer.pop();
-                            app.search_tasks(&app.input_buffer.clone());
+                            let query = app.input_buffer.clone();
+                            app.search_tasks(&query);
                         }
                         _ => {}
                     },
