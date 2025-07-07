@@ -16,6 +16,41 @@ pub enum Priority {
     High,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum Category {
+    Work,
+    Personal,
+    Learning,
+    Health,
+    Finance,
+    Other(String),
+}
+
+impl Category {
+    pub fn icon(&self) -> &str {
+        match self {
+            Category::Work => "💼",
+            Category::Personal => "🏠",
+            Category::Learning => "📚",
+            Category::Health => "💪",
+            Category::Finance => "💰",
+            Category::Other(_) => "📌",
+        }
+    }
+    
+    pub fn color(&self) -> ratatui::style::Color {
+        use ratatui::style::Color;
+        match self {
+            Category::Work => Color::Blue,
+            Category::Personal => Color::Green,
+            Category::Learning => Color::Magenta,
+            Category::Health => Color::Cyan,
+            Category::Finance => Color::Yellow,
+            Category::Other(_) => Color::Gray,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Task {
     pub id: Uuid,
@@ -23,6 +58,7 @@ pub struct Task {
     pub description: Option<String>,
     pub status: TaskStatus,
     pub priority: Priority,
+    pub category: Category,
     pub due_date: Option<DateTime<Local>>,
     pub created_at: DateTime<Local>,
     pub updated_at: DateTime<Local>,
@@ -37,6 +73,7 @@ impl Task {
             description: None,
             status: TaskStatus::Todo,
             priority: Priority::Medium,
+            category: Category::Personal,
             due_date: None,
             created_at: now,
             updated_at: now,
@@ -53,8 +90,24 @@ impl Task {
         self
     }
 
+    pub fn with_category(mut self, category: Category) -> Self {
+        self.category = category;
+        self
+    }
+
     pub fn with_due_date(mut self, due_date: DateTime<Local>) -> Self {
         self.due_date = Some(due_date);
         self
+    }
+
+    pub fn days_until_due(&self) -> Option<i64> {
+        self.due_date.map(|due| {
+            let now = Local::now();
+            (due.date_naive() - now.date_naive()).num_days()
+        })
+    }
+
+    pub fn is_overdue(&self) -> bool {
+        self.days_until_due().map(|days| days < 0).unwrap_or(false)
     }
 }
