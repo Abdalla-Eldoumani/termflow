@@ -66,7 +66,8 @@ fn run_app(
                         }
                         KeyCode::Enter => {
                             if !app.input_buffer.trim().is_empty() {
-                                app.add_task(app.input_buffer.drain(..).collect());
+                                let task_title = app.input_buffer.drain(..).collect();
+                                app.add_task(task_title);
                                 app.input_mode = InputMode::Normal;
                             }
                         }
