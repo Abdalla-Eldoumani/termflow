@@ -54,6 +54,7 @@ fn run_app(
                             app.input_mode = InputMode::Insert;
                             app.input_buffer.clear();
                         }
+                        KeyCode::Char('d') => app.delete_selected_task(),
                         KeyCode::Char(' ') => app.toggle_selected_task_status(),
                         KeyCode::Up | KeyCode::Char('k') => app.move_selection_up(),
                         KeyCode::Down | KeyCode::Char('j') => app.move_selection_down(),
