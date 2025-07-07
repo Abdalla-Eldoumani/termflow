@@ -318,13 +318,24 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
 fn draw_input_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(60, 20, f.size());
     
+    let popup_title = format!("New {} Task", match app.new_task_category {
+        Category::Work => "Work 💼",
+        Category::Personal => "Personal 🏠",
+        Category::Learning => "Learning 📚",
+        Category::Health => "Health 💪",
+        Category::Finance => "Finance 💰",
+        Category::Other(_) => "Other 📌",
+    });
+    
     let popup = Paragraph::new(app.input_buffer.as_str())
         .style(Style::default().fg(Color::White))
         .block(
             Block::default()
-                .title("New Task")
+                .title(popup_title)
                 .borders(Borders::ALL)
-                .style(Style::default().bg(Color::DarkGray)),
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(app.new_task_category.color()))
+                .style(Style::default().bg(Color::Black)),
         );
     
     f.render_widget(popup, area);
