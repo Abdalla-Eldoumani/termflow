@@ -2,13 +2,13 @@ use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem, Paragraph},
+    widgets::{Block, Borders, List, ListItem, Paragraph, BorderType},
     Frame,
 };
 
 use crate::{
     app::{App, InputMode},
-    models::{TaskStatus, Priority},
+    models::{TaskStatus, Priority, Category},
 };
 
 pub fn draw(f: &mut Frame, app: &App) {
@@ -23,7 +23,7 @@ pub fn draw(f: &mut Frame, app: &App) {
         .split(f.size());
 
     draw_title(f, chunks[0]);
-    draw_task_list(f, app, chunks[1]);
+    draw_task_list_grouped(f, app, chunks[1]);
     draw_status_bar(f, app, chunks[2]);
 
     match app.input_mode {
@@ -49,11 +49,111 @@ fn draw_search_popup(f: &mut Frame, app: &App) {
 }
 
 fn draw_title(f: &mut Frame, area: Rect) {
-    let title = Paragraph::new("TermFlow - Terminal Productivity Suite")
+    let title = Paragraph::new("✨ TermFlow - Terminal Productivity Suite ✨")
         .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
         .alignment(Alignment::Center)
-        .block(Block::default().borders(Borders::ALL));
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(Color::Cyan))
+        );
     f.render_widget(title, area);
+}
+
+fn draw_task_list_grouped(f: &mut Frame, app: &App, area: Rect) {
+    let mut tasks_by_category: std::collections::HashMap<Category, Vec<_>> = std::collections::HashMap::new();
+    
+    for task_id in &app.filtered_tasks {
+        if let Some(task) = app.tasks.get(task_id) {
+            tasks_by_category.entry(task.category.clone()).or_insert_with(Vec::new).push(task);
+        }
+    }
+
+    let mut list_items = Vec::new();
+    let mut current_idx = 0;
+
+    let mut categories: Vec<_> = tasks_by_category.keys().cloned().collect();
+    categories.sort_by(|a, b| format!("{:?}", a).cmp(&format!("{:?}", b)));
+
+    for category in categories {
+        if let Some(tasks) = tasks_by_category.get(&category) {
+            list_items.push(ListItem::new(Line::from(vec![
+                Span::raw(format!("{} ", category.icon())),
+                Span::styled(
+                    format!("{:?}", category),
+                    Style::default()
+                        .fg(category.color())
+                        .add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
+                ),
+            ])));
+
+            for task in tasks {
+                let status_symbol = match task.status {
+                    TaskStatus::Todo => "□",
+                    TaskStatus::InProgress => "◐",
+                    TaskStatus::Done => "☑",
+                };
+
+                let priority_color = match task.priority {
+                    Priority::High => Color::Red,
+                    Priority::Medium => Color::Yellow,
+                    Priority::Low => Color::Green,
+                };
+
+                let mut content = vec![
+                    Span::raw("  "),
+                    Span::raw(format!("{} ", status_symbol)),
+                    Span::styled(
+                        &task.title,
+                        Style::default().fg(priority_color),
+                    ),
+                ];
+
+                if let Some(days) = task.days_until_due() {
+                    let due_text = match days {
+                        0 => "Today".to_string(),
+                        1 => "Tomorrow".to_string(),
+                        -1 => "Yesterday".to_string(),
+                        d if d < 0 => format!("{}d overdue", -d),
+                        d => format!("{}d", d),
+                    };
+                    
+                    let due_color = if task.is_overdue() {
+                        Color::Red
+                    } else if days <= 1 {
+                        Color::Yellow
+                    } else {
+                        Color::Gray
+                    };
+                    
+                    content.push(Span::raw("  "));
+                    content.push(Span::styled(due_text, Style::default().fg(due_color)));
+                }
+
+                let style = if Some(current_idx) == app.selected_task {
+                    Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD)
+                } else {
+                    Style::default()
+                };
+
+                list_items.push(ListItem::new(Line::from(content)).style(style));
+                current_idx += 1;
+            }
+            
+            list_items.push(ListItem::new(""));
+        }
+    }
+
+    let tasks_list = List::new(list_items)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .title("Tasks")
+        );
+
+    f.render_widget(tasks_list, area);
 }
 
 fn draw_task_list(f: &mut Frame, app: &App, area: Rect) {
