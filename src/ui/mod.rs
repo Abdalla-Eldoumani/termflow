@@ -66,6 +66,51 @@ fn draw_header(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(progress, header_chunks[1]);
 }
 
+fn draw_category_popup(f: &mut Frame, app: &App) {
+    let area = centered_rect(50, 40, f.size());
+    
+    let categories = vec![
+        (Category::Personal, "Personal tasks, life stuff"),
+        (Category::Work, "Work and professional tasks"),
+        (Category::Learning, "Learning and growth"),
+        (Category::Health, "Health and fitness"),
+        (Category::Finance, "Money matters"),
+    ];
+    
+    let mut items = vec![
+        ListItem::new("Select a category:").style(Style::default().add_modifier(Modifier::BOLD)),
+        ListItem::new(""),
+    ];
+    
+    for (idx, (cat, desc)) in categories.iter().enumerate() {
+        let style = if idx == app.category_selection {
+            Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD)
+        } else {
+            Style::default()
+        };
+        
+        let item = ListItem::new(Line::from(vec![
+            Span::raw(format!("{} ", cat.icon())),
+            Span::styled(format!("{:?}", cat), style.fg(cat.color())),
+            Span::raw(" - "),
+            Span::styled(desc, Style::default().fg(Color::Gray)),
+        ])).style(style);
+        
+        items.push(item);
+    }
+    
+    let list = List::new(items)
+        .block(
+            Block::default()
+                .title("🎯 Choose Category")
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .style(Style::default().bg(Color::Black))
+        );
+    
+    f.render_widget(list, area);
+}
+
 fn draw_search_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(60, 20, f.size());
     
