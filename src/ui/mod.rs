@@ -26,9 +26,26 @@ pub fn draw(f: &mut Frame, app: &App) {
     draw_task_list(f, app, chunks[1]);
     draw_status_bar(f, app, chunks[2]);
 
-    if app.input_mode == InputMode::Insert {
-        draw_input_popup(f, app);
+    match app.input_mode {
+        InputMode::Insert => draw_input_popup(f, app),
+        InputMode::Search => draw_search_popup(f, app),
+        _ => {}
     }
+}
+
+fn draw_search_popup(f: &mut Frame, app: &App) {
+    let area = centered_rect(60, 20, f.size());
+    
+    let popup = Paragraph::new(app.input_buffer.as_str())
+        .style(Style::default().fg(Color::White))
+        .block(
+            Block::default()
+                .title("Search Tasks")
+                .borders(Borders::ALL)
+                .style(Style::default().bg(Color::DarkGray)),
+        );
+    
+    f.render_widget(popup, area);
 }
 
 fn draw_title(f: &mut Frame, area: Rect) {
