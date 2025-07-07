@@ -2,7 +2,7 @@ use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem, Paragraph, BorderType},
+    widgets::{Block, Borders, List, ListItem, Paragraph, BorderType, Gauge},
     Frame,
 };
 
@@ -16,21 +16,54 @@ pub fn draw(f: &mut Frame, app: &App) {
         .direction(Direction::Vertical)
         .margin(1)
         .constraints([
-            Constraint::Length(3),
+            Constraint::Length(5),
             Constraint::Min(0),
             Constraint::Length(3),
         ])
         .split(f.size());
 
-    draw_title(f, chunks[0]);
+    draw_header(f, app, chunks[0]);
     draw_task_list_grouped(f, app, chunks[1]);
     draw_status_bar(f, app, chunks[2]);
 
     match app.input_mode {
         InputMode::Insert => draw_input_popup(f, app),
+        InputMode::SelectCategory => draw_category_popup(f, app),
         InputMode::Search => draw_search_popup(f, app),
         _ => {}
     }
+}
+
+fn draw_header(f: &mut Frame, app: &App, area: Rect) {
+    let header_chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(3),
+            Constraint::Length(2),
+        ])
+        .split(area);
+
+    let title_text = if app.tasks.is_empty() {
+        "╔═══════════════════════════════════════════════════════╗\n║  🚀 TermFlow - Let's Get Things Done! 🚀             ║\n╚═══════════════════════════════════════════════════════╝"
+    } else {
+        "╔═══════════════════════════════════════════════════════╗\n║  ⚡ TermFlow - Crushing It! ⚡                        ║\n╚═══════════════════════════════════════════════════════╝"
+    };
+    
+    let title = Paragraph::new(title_text)
+        .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center);
+    f.render_widget(title, header_chunks[0]);
+
+    let (completed, total, percentage) = app.get_completion_stats();
+    let progress_label = format!("Progress: {}/{} tasks", completed, total);
+    
+    let progress = Gauge::default()
+        .block(Block::default().title(progress_label))
+        .gauge_style(Style::default().fg(Color::Green).bg(Color::DarkGray))
+        .percent(percentage as u16)
+        .label(format!("{}%", percentage as u16));
+    
+    f.render_widget(progress, header_chunks[1]);
 }
 
 fn draw_search_popup(f: &mut Frame, app: &App) {
