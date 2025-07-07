@@ -37,15 +37,30 @@ impl App {
     }
 
     fn add_demo_tasks(&mut self) {
+        use crate::models::Category;
+        
         let demo_tasks = vec![
             Task::new("Complete Rust project".to_string())
-                .with_priority(Priority::High),
+                .with_priority(Priority::High)
+                .with_category(Category::Work)
+                .with_due_date(chrono::Local::now() + chrono::Duration::days(2)),
             Task::new("Review documentation".to_string())
-                .with_priority(Priority::Medium),
-            Task::new("Plan next features".to_string())
-                .with_priority(Priority::Low),
+                .with_priority(Priority::Medium)
+                .with_category(Category::Work)
+                .with_due_date(chrono::Local::now()),
+            Task::new("Learn async Rust".to_string())
+                .with_priority(Priority::High)
+                .with_category(Category::Learning),
+            Task::new("Buy groceries".to_string())
+                .with_priority(Priority::Low)
+                .with_category(Category::Personal)
+                .with_due_date(chrono::Local::now() + chrono::Duration::days(1)),
+            Task::new("Workout".to_string())
+                .with_priority(Priority::Medium)
+                .with_category(Category::Health)
+                .with_due_date(chrono::Local::now()),
         ];
-
+    
         for task in demo_tasks {
             self.tasks.insert(task.id, task);
         }
