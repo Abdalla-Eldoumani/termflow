@@ -16,7 +16,7 @@ pub enum Priority {
     High,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum Category {
     Work,
     Personal,
