@@ -279,21 +279,38 @@ fn draw_task_list(f: &mut Frame, app: &App, area: Rect) {
 }
 
 fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
+    let (today_done, today_total) = app.get_today_stats();
+    
     let mode = match app.input_mode {
         InputMode::Normal => "NORMAL",
         InputMode::Insert => "INSERT",
+        InputMode::SelectCategory => "CATEGORY",
         InputMode::Search => "SEARCH",
     };
 
     let key_hints = match app.input_mode {
         InputMode::Normal => "[n]ew [Space]toggle [d]elete [q]uit [/]search",
-        InputMode::Insert => "[Esc]cancel [Enter]save",
+        InputMode::Insert => "[Tab]category [Esc]cancel [Enter]save",
+        InputMode::SelectCategory => "[Tab]cycle [Enter]select [Esc]cancel",
         InputMode::Search => "[Esc]cancel [Enter]search",
     };
 
-    let status = Paragraph::new(format!("{} | {}", mode, key_hints))
+    let motivational = if today_done == today_total && today_total > 0 {
+        " 🎉 All done for today!"
+    } else if today_done > 0 {
+        " 💪 Keep going!"
+    } else {
+        " 🌟 Let's start!"
+    };
+
+    let status_text = format!(
+        "{} | {} | Today: {}/{}{}", 
+        mode, key_hints, today_done, today_total, motivational
+    );
+
+    let status = Paragraph::new(status_text)
         .style(Style::default().fg(Color::White))
-        .block(Block::default().borders(Borders::ALL));
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
 
     f.render_widget(status, area);
 }
