@@ -306,14 +306,14 @@ fn draw_task_list_grouped(f: &mut Frame, app: &App, area: Rect) {
     let mut current_idx = 0;
 
     let mut categories: Vec<_> = tasks_by_category.keys().cloned().collect();
-    categories.sort_by(|a, b| format!("{:?}", a).cmp(&format!("{:?}", b)));
+    categories.sort_by(|a, b| a.display_name().cmp(&b.display_name()));
 
     for category in categories {
         if let Some(tasks) = tasks_by_category.get(&category) {
             list_items.push(ListItem::new(Line::from(vec![
                 Span::raw(format!("{} ", category.icon())),
                 Span::styled(
-                    format!("{:?}", category),
+                    category.display_name(),
                     Style::default()
                         .fg(category.color())
                         .add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
