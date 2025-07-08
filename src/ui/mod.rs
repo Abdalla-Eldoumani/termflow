@@ -69,13 +69,19 @@ fn draw_header(f: &mut Frame, app: &App, area: Rect) {
 fn draw_category_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(50, 40, f.size());
     
-    let categories = vec![
+    let mut categories = vec![
         (Category::Personal, "Personal tasks, life stuff"),
         (Category::Work, "Work and professional tasks"),
         (Category::Learning, "Learning and growth"),
         (Category::Health, "Health and fitness"),
         (Category::Finance, "Money matters"),
     ];
+    
+    for cat in &app.custom_categories {
+        if let Category::Custom { name, .. } = cat {
+            categories.push((cat.clone(), &name[..]));
+        }
+    }
     
     let mut items = vec![
         ListItem::new("Select a category:").style(Style::default().add_modifier(Modifier::BOLD)),
@@ -91,13 +97,24 @@ fn draw_category_popup(f: &mut Frame, app: &App) {
         
         let item = ListItem::new(Line::from(vec![
             Span::raw(format!("{} ", cat.icon())),
-            Span::styled(format!("{:?}", cat), style.fg(cat.color())),
+            Span::styled(cat.display_name(), style.fg(cat.color())),
             Span::raw(" - "),
-            Span::styled(*desc, Style::default().fg(Color::Gray)),
+            Span::styled(desc.to_string(), Style::default().fg(Color::Gray)),
         ])).style(style);
         
         items.push(item);
     }
+    
+    let create_style = if app.category_selection == categories.len() {
+        Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD)
+    } else {
+        Style::default()
+    };
+    
+    items.push(ListItem::new(Line::from(vec![
+        Span::raw("➕ "),
+        Span::styled("Create Custom Category", create_style.fg(Color::Cyan)),
+    ])).style(create_style));
     
     let list = List::new(items)
         .block(
