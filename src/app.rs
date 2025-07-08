@@ -44,17 +44,25 @@ impl App {
         app
     }
 
-    pub fn cycle_category(&mut self) {
-        let categories = vec![
+    pub fn get_all_categories(&self) -> Vec<Category> {
+        let mut categories = vec![
             Category::Personal,
             Category::Work,
             Category::Learning,
             Category::Health,
             Category::Finance,
         ];
+        categories.extend(self.custom_categories.clone());
+        categories
+    }
+
+    pub fn cycle_category(&mut self) {
+        let categories = self.get_all_categories();
+        self.category_selection = (self.category_selection + 1) % (categories.len() + 1);
         
-        self.category_selection = (self.category_selection + 1) % categories.len();
-        self.new_task_category = categories[self.category_selection].clone();
+        if self.category_selection < categories.len() {
+            self.new_task_category = categories[self.category_selection].clone();
+        }
     }
 
     pub fn add_task(&mut self, title: String) {
