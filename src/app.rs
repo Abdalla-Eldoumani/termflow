@@ -65,7 +65,18 @@ impl App {
         }
     }
 
+    pub fn check_duplicate_task(&self, title: &str, category: &Category) -> bool {
+        self.tasks.values().any(|task| {
+            task.title.to_lowercase() == title.to_lowercase() && 
+            &task.category == category
+        })
+    }
+
     pub fn add_task(&mut self, title: String) {
+        if self.check_duplicate_task(&title, &self.new_task_category) {
+            return;
+        }
+        
         let task = Task::new(title)
             .with_category(self.new_task_category.clone());
         self.tasks.insert(task.id, task);
@@ -86,10 +97,11 @@ impl App {
     }
 
     pub fn get_today_stats(&self) -> (usize, usize) {
+        let today = chrono::Local::now().date_naive();
         let today_tasks: Vec<_> = self.tasks.values()
             .filter(|t| {
-                t.due_date.map(|d| d.date_naive() == chrono::Local::now().date_naive())
-                    .unwrap_or(false)
+                t.due_date.map(|d| d.date_naive() == today).unwrap_or(false) ||
+                (t.due_date.is_none() && t.created_at.date_naive() == today)
             })
             .collect();
         
