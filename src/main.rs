@@ -43,6 +43,7 @@ fn run_app(
     mut app: App,
 ) -> Result<()> {
     loop {
+        app.check_message_timeout();
         terminal.draw(|f| ui::draw(f, &app))?;
 
         if crossterm::event::poll(Duration::from_millis(250))? {
