@@ -1,7 +1,6 @@
 use crate::models::{Task, TaskStatus, Priority, Category};
 use std::collections::HashMap;
 use uuid::Uuid;
-pub use self::CustomCategoryBuilder;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum InputMode {
