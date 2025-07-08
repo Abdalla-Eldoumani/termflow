@@ -113,7 +113,8 @@ fn draw_category_popup(f: &mut Frame, app: &App) {
     
     for cat in &app.custom_categories {
         if let Category::Custom { name, .. } = cat {
-            categories.push((cat.clone(), &name[..]));
+            let desc = format!("Custom: {}", name);
+            categories.push((cat.clone(), desc));
         }
     }
     
