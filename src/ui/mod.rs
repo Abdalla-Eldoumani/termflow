@@ -103,7 +103,12 @@ fn draw_header(f: &mut Frame, app: &App, area: Rect) {
 fn draw_category_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(50, 40, f.size());
     
-    let mut categories = vec![
+    let mut items = vec![
+        ListItem::new("Select a category:").style(Style::default().add_modifier(Modifier::BOLD)),
+        ListItem::new(""),
+    ];
+    
+    let builtin_categories = vec![
         (Category::Personal, "Personal tasks, life stuff"),
         (Category::Work, "Work and professional tasks"),
         (Category::Learning, "Learning and growth"),
@@ -111,20 +116,12 @@ fn draw_category_popup(f: &mut Frame, app: &App) {
         (Category::Finance, "Money matters"),
     ];
     
-    for cat in &app.custom_categories {
-        if let Category::Custom { name, .. } = cat {
-            let desc = format!("Custom: {}", name);
-            categories.push((cat.clone(), desc));
-        }
-    }
+    let mut all_categories = Vec::new();
     
-    let mut items = vec![
-        ListItem::new("Select a category:").style(Style::default().add_modifier(Modifier::BOLD)),
-        ListItem::new(""),
-    ];
-    
-    for (idx, (cat, desc)) in categories.iter().enumerate() {
-        let style = if idx == app.category_selection {
+    for (cat, desc) in builtin_categories {
+        all_categories.push(cat.clone());
+        
+        let style = if all_categories.len() - 1 == app.category_selection {
             Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD)
         } else {
             Style::default()
@@ -134,13 +131,32 @@ fn draw_category_popup(f: &mut Frame, app: &App) {
             Span::raw(format!("{} ", cat.icon())),
             Span::styled(cat.display_name(), style.fg(cat.color())),
             Span::raw(" - "),
-            Span::styled(desc.to_string(), Style::default().fg(Color::Gray)),
+            Span::styled(desc, Style::default().fg(Color::Gray)),
         ])).style(style);
         
         items.push(item);
     }
     
-    let create_style = if app.category_selection == categories.len() {
+    for cat in &app.custom_categories {
+        all_categories.push(cat.clone());
+        
+        let style = if all_categories.len() - 1 == app.category_selection {
+            Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD)
+        } else {
+            Style::default()
+        };
+        
+        let item = ListItem::new(Line::from(vec![
+            Span::raw(format!("{} ", cat.icon())),
+            Span::styled(cat.display_name(), style.fg(cat.color())),
+            Span::raw(" - "),
+            Span::styled("Custom category", Style::default().fg(Color::Gray)),
+        ])).style(style);
+        
+        items.push(item);
+    }
+    
+    let create_style = if app.category_selection == all_categories.len() {
         Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD)
     } else {
         Style::default()
