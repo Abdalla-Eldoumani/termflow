@@ -343,27 +343,47 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
 fn draw_input_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(60, 20, f.size());
     
-    let popup_title = format!("New {} Task", match app.new_task_category {
+    let popup_title = format!("New {} Task", match &app.new_task_category {
         Category::Work => "Work 💼",
         Category::Personal => "Personal 🏠",
         Category::Learning => "Learning 📚",
         Category::Health => "Health 💪",
         Category::Finance => "Finance 💰",
-        Category::Other(_) => "Other 📌",
+        Category::Custom { name, icon, .. } => &format!("{} {}", name, icon),
     });
     
-    let popup = Paragraph::new(app.input_buffer.as_str())
-        .style(Style::default().fg(Color::White))
-        .block(
-            Block::default()
-                .title(popup_title)
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(app.new_task_category.color()))
-                .style(Style::default().bg(Color::Black)),
-        );
+    let is_duplicate = app.check_duplicate_task(&app.input_buffer, &app.new_task_category);
+    let hint = if is_duplicate {
+        vec![
+            Span::styled("⚠️ ", Style::default().fg(Color::Yellow)),
+            Span::styled("This task already exists in this category!", Style::default().fg(Color::Yellow))
+        ]
+    } else {
+        vec![Span::raw("")]
+    };
     
-    f.render_widget(popup, area);
+    let input_text = Paragraph::new(app.input_buffer.as_str())
+        .style(Style::default().fg(if is_duplicate { Color::Yellow } else { Color::White }));
+    
+    let block = Block::default()
+        .title(popup_title)
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
+        .border_style(Style::default().fg(app.new_task_category.color()))
+        .style(Style::default().bg(Color::Black));
+    
+    let inner = block.inner(area);
+    f.render_widget(block, area);
+    
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Length(1), Constraint::Length(1)])
+        .split(inner);
+    
+    f.render_widget(input_text, chunks[0]);
+    if is_duplicate {
+        f.render_widget(Paragraph::new(Line::from(hint)), chunks[1]);
+    }
 }
 
 fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
