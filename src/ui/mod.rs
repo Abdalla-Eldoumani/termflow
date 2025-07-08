@@ -129,6 +129,29 @@ fn draw_category_popup(f: &mut Frame, app: &App) {
     f.render_widget(list, area);
 }
 
+fn draw_create_category_popup(f: &mut Frame, app: &App) {
+    let area = centered_rect(60, 20, f.size());
+    
+    let title = match app.custom_category_step {
+        0 => "Enter category name:",
+        1 => "Enter an emoji icon:",
+        2 => "Choose a color (1-7):",
+        _ => "Creating category...",
+    };
+    
+    let popup = Paragraph::new(app.input_buffer.as_str())
+        .style(Style::default().fg(Color::White))
+        .block(
+            Block::default()
+                .title(format!("🎨 Create Custom Category - Step {}/3", app.custom_category_step + 1))
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .style(Style::default().bg(Color::DarkGray)),
+        );
+    
+    f.render_widget(popup, area);
+}
+
 fn draw_search_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(60, 20, f.size());
     
