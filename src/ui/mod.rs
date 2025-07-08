@@ -310,6 +310,7 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
         InputMode::Normal => "NORMAL",
         InputMode::Insert => "INSERT",
         InputMode::SelectCategory => "CATEGORY",
+        InputMode::CreateCategory => "CREATE CAT",
         InputMode::Search => "SEARCH",
     };
 
@@ -317,6 +318,7 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
         InputMode::Normal => "[n]ew [Space]toggle [d]elete [q]uit [/]search",
         InputMode::Insert => "[Tab]category [Esc]cancel [Enter]save",
         InputMode::SelectCategory => "[Tab]cycle [Enter]select [Esc]cancel",
+        InputMode::CreateCategory => "[Esc]cancel [Enter]next",
         InputMode::Search => "[Esc]cancel [Enter]search",
     };
 
