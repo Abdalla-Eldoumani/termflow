@@ -93,6 +93,23 @@ fn run_app(
                         }
                         _ => {}
                     },
+                    InputMode::CreateCategory => match key.code {
+                        KeyCode::Esc => {
+                            app.input_mode = InputMode::SelectCategory;
+                            app.input_buffer.clear();
+                            app.custom_category_step = 0;
+                        }
+                        KeyCode::Enter => {
+                            app.input_mode = InputMode::SelectCategory;
+                        }
+                        KeyCode::Char(c) => {
+                            app.input_buffer.push(c);
+                        }
+                        KeyCode::Backspace => {
+                            app.input_buffer.pop();
+                        }
+                        _ => {}
+                    },
                     InputMode::SelectCategory => match key.code {
                         KeyCode::Tab => {
                             app.cycle_category();
