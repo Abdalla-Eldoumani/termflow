@@ -131,7 +131,15 @@ fn draw_category_popup(f: &mut Frame, app: &App) {
 fn draw_search_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(60, 20, f.size());
     
-    let popup = Paragraph::new(app.input_buffer.as_str())
+    let content = if app.tasks.is_empty() && app.input_buffer.is_empty() {
+        "No tasks to search for! Press 'n' to create your first task."
+    } else if !app.tasks.is_empty() && app.filtered_tasks.is_empty() && !app.input_buffer.is_empty() {
+        "No tasks match your search."
+    } else {
+        app.input_buffer.as_str()
+    };
+    
+    let popup = Paragraph::new(content)
         .style(Style::default().fg(Color::White))
         .block(
             Block::default()
