@@ -172,11 +172,10 @@ fn draw_create_category_popup(f: &mut Frame, app: &App) {
             "Enter a name for your category (e.g., 'Hobbies', 'Side Projects')"
         ),
         1 => {
-            let emojis = App::get_emoji_options();
             let current_emoji = &app.custom_category_data.icon;
             (
                 "Step 2/3: Choose an Icon",
-                current_emoji,
+                current_emoji.as_str(),
                 "Press Tab to cycle through icons, Enter to confirm"
             )
         },
