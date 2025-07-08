@@ -29,6 +29,7 @@ pub fn draw(f: &mut Frame, app: &App) {
     match app.input_mode {
         InputMode::Insert => draw_input_popup(f, app),
         InputMode::SelectCategory => draw_category_popup(f, app),
+        InputMode::CreateCategory => draw_create_category_popup(f, app),
         InputMode::Search => draw_search_popup(f, app),
         _ => {}
     }
