@@ -59,10 +59,32 @@ impl App {
             category_selection: 0,
             custom_categories: Vec::new(),
             custom_category_step: 0,
+            custom_category_data: CustomCategoryBuilder::default(),
+            show_message: None,
         };
         
         app.update_filtered_tasks();
         app
+    }
+
+    pub fn show_temporary_message(&mut self, message: String) {
+        self.show_message = Some((message, std::time::Instant::now()));
+    }
+
+    pub fn get_emoji_options() -> Vec<&'static str> {
+        vec![
+            "📌", "🎯", "🎨", "🎮", "🎸", "🏃", "🚀", "⭐",
+            "💡", "📖", "✈️", "🏡", "🍕", "🎭", "🔧", "💻",
+            "🎪", "🏖️", "🌱", "🎲", "🎬", "📸", "🎤", "🎧",
+            "🏆", "🔥", "💎", "🌟", "🌈", "🦄", "🐉", "🦊",
+        ]
+    }
+
+    pub fn cycle_emoji(&mut self) {
+        let emojis = Self::get_emoji_options();
+        self.custom_category_data.icon_selection = 
+            (self.custom_category_data.icon_selection + 1) % emojis.len();
+        self.custom_category_data.icon = emojis[self.custom_category_data.icon_selection].to_string();
     }
 
     pub fn get_all_categories(&self) -> Vec<Category> {
