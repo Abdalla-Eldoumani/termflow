@@ -78,9 +78,11 @@ fn run_app(
                         }
                         KeyCode::Enter => {
                             if !app.input_buffer.trim().is_empty() {
-                                let task_title = app.input_buffer.drain(..).collect();
-                                app.add_task(task_title);
-                                app.input_mode = InputMode::Normal;
+                                if !app.check_duplicate_task(&app.input_buffer, &app.new_task_category) {
+                                    let task_title = app.input_buffer.drain(..).collect();
+                                    app.add_task(task_title);
+                                    app.input_mode = InputMode::Normal;
+                                }
                             }
                         }
                         KeyCode::Char(c) => {
@@ -96,7 +98,14 @@ fn run_app(
                             app.cycle_category();
                         }
                         KeyCode::Enter => {
-                            app.input_mode = InputMode::Insert;
+                            let categories = app.get_all_categories();
+                            if app.category_selection == categories.len() {
+                                app.input_mode = InputMode::CreateCategory;
+                                app.input_buffer.clear();
+                                app.custom_category_step = 0;
+                            } else {
+                                app.input_mode = InputMode::Insert;
+                            }
                         }
                         KeyCode::Esc => {
                             app.input_mode = InputMode::Insert;
