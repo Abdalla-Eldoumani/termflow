@@ -7,6 +7,7 @@ pub enum InputMode {
     Normal,
     Insert,
     SelectCategory,
+    CreateCategory,
     Search,
 }
 
@@ -20,6 +21,8 @@ pub struct App {
     pub should_quit: bool,
     pub new_task_category: Category,
     pub category_selection: usize,
+    pub custom_categories: Vec<Category>,
+    pub custom_category_step: usize,
 }
 
 impl App {
@@ -33,6 +36,8 @@ impl App {
             should_quit: false,
             new_task_category: Category::Personal,
             category_selection: 0,
+            custom_categories: Vec::new(),
+            custom_category_step: 0,
         };
         
         app.update_filtered_tasks();
