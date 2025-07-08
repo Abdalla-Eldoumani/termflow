@@ -23,6 +23,27 @@ pub struct App {
     pub category_selection: usize,
     pub custom_categories: Vec<Category>,
     pub custom_category_step: usize,
+    pub custom_category_data: CustomCategoryBuilder,
+    pub show_message: Option<(String, std::time::Instant)>, 
+}
+
+#[derive(Debug)]
+pub struct CustomCategoryBuilder {
+    pub name: String,
+    pub icon: String,
+    pub color_index: u8,
+    pub icon_selection: usize,
+}
+
+impl Default for CustomCategoryBuilder {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            icon: "📌".to_string(),
+            color_index: 0,
+            icon_selection: 0,
+        }
+    }
 }
 
 impl App {
