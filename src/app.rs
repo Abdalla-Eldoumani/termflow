@@ -87,6 +87,22 @@ impl App {
         self.custom_category_data.icon = emojis[self.custom_category_data.icon_selection].to_string();
     }
 
+    pub fn complete_custom_category(&mut self) {
+        let new_category = Category::Custom {
+            name: self.custom_category_data.name.clone(),
+            icon: self.custom_category_data.icon.clone(),
+            color_index: self.custom_category_data.color_index,
+        };
+        
+        self.custom_categories.push(new_category.clone());
+        self.new_task_category = new_category;
+        
+        self.custom_category_data = CustomCategoryBuilder::default();
+        self.custom_category_step = 0;
+        self.input_buffer.clear();
+        self.input_mode = InputMode::Insert;
+    }
+
     pub fn get_all_categories(&self) -> Vec<Category> {
         let mut categories = vec![
             Category::Personal,
@@ -173,6 +189,11 @@ impl App {
     }
 
     pub fn delete_selected_task(&mut self) {
+        if self.tasks.is_empty() {
+            self.show_temporary_message("No tasks to delete!".to_string());
+            return;
+        }
+        
         if let Some(selected_idx) = self.selected_task {
             if let Some(task_id) = self.filtered_tasks.get(selected_idx).copied() {
                 self.tasks.remove(&task_id);
@@ -183,6 +204,8 @@ impl App {
                 } else if selected_idx >= self.filtered_tasks.len() {
                     self.selected_task = Some(self.filtered_tasks.len() - 1);
                 }
+                
+                self.show_temporary_message("Task deleted!".to_string());
             }
         }
     }
@@ -231,9 +254,14 @@ impl App {
     }
     
     pub fn toggle_selected_task_status(&mut self) {
+        if self.tasks.is_empty() {
+            self.show_temporary_message("No tasks to toggle! Press 'n' to create one.".to_string());
+            return;
+        }
+        
         if let Some(task_id) = self.selected_task
-        .and_then(|idx| self.filtered_tasks.get(idx))
-        .copied()
+            .and_then(|idx| self.filtered_tasks.get(idx))
+            .copied()
         {
             if let Some(task) = self.tasks.get_mut(&task_id) {
                 task.status = match task.status {
@@ -265,34 +293,4 @@ impl App {
             self.selected_task = Some(0);
         }
     }
-
-    // fn add_demo_tasks(&mut self) {
-    //     use crate::models::Category;
-        
-    //     let demo_tasks = vec![
-    //         Task::new("Complete Rust project".to_string())
-    //             .with_priority(Priority::High)
-    //             .with_category(Category::Work)
-    //             .with_due_date(chrono::Local::now() + chrono::Duration::days(2)),
-    //         Task::new("Review documentation".to_string())
-    //             .with_priority(Priority::Medium)
-    //             .with_category(Category::Work)
-    //             .with_due_date(chrono::Local::now()),
-    //         Task::new("Learn async Rust".to_string())
-    //             .with_priority(Priority::High)
-    //             .with_category(Category::Learning),
-    //         Task::new("Buy groceries".to_string())
-    //             .with_priority(Priority::Low)
-    //             .with_category(Category::Personal)
-    //             .with_due_date(chrono::Local::now() + chrono::Duration::days(1)),
-    //         Task::new("Workout".to_string())
-    //             .with_priority(Priority::Medium)
-    //             .with_category(Category::Health)
-    //             .with_due_date(chrono::Local::now()),
-    //     ];
-    
-    //     for task in demo_tasks {
-    //         self.tasks.insert(task.id, task);
-    //     }
-    // }
 }
