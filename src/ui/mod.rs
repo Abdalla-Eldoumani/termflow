@@ -23,7 +23,17 @@ pub fn draw(f: &mut Frame, app: &App) {
         .split(f.size());
 
     draw_header(f, app, chunks[0]);
-    draw_task_list_grouped(f, app, chunks[1]);
+    
+    if let Some((msg, time)) = &app.show_message {
+        if time.elapsed().as_secs() < 3 {
+            draw_message(f, msg, chunks[1]);
+        } else {
+            draw_task_list_grouped(f, app, chunks[1]);
+        }
+    } else {
+        draw_task_list_grouped(f, app, chunks[1]);
+    }
+    
     draw_status_bar(f, app, chunks[2]);
 
     match app.input_mode {
@@ -33,6 +43,29 @@ pub fn draw(f: &mut Frame, app: &App) {
         InputMode::Search => draw_search_popup(f, app),
         _ => {}
     }
+}
+
+fn draw_message(f: &mut Frame, message: &str, area: Rect) {
+    let message_widget = Paragraph::new(message)
+        .style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(Color::Yellow))
+        );
+    
+    let centered = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage(40),
+            Constraint::Length(3),
+            Constraint::Percentage(40),
+        ])
+        .split(area);
+    
+    f.render_widget(message_widget, centered[1]);
 }
 
 fn draw_header(f: &mut Frame, app: &App, area: Rect) {
