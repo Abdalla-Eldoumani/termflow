@@ -163,26 +163,99 @@ fn draw_category_popup(f: &mut Frame, app: &App) {
 }
 
 fn draw_create_category_popup(f: &mut Frame, app: &App) {
-    let area = centered_rect(60, 20, f.size());
+    let area = centered_rect(60, 30, f.size());
     
-    let title = match app.custom_category_step {
-        0 => "Enter category name:",
-        1 => "Enter an emoji icon:",
-        2 => "Choose a color (1-7):",
-        _ => "Creating category...",
+    let (title, content, hint) = match app.custom_category_step {
+        0 => (
+            "Step 1/3: Category Name",
+            app.input_buffer.as_str(),
+            "Enter a name for your category (e.g., 'Hobbies', 'Side Projects')"
+        ),
+        1 => {
+            let emojis = App::get_emoji_options();
+            let current_emoji = &app.custom_category_data.icon;
+            (
+                "Step 2/3: Choose an Icon",
+                current_emoji,
+                "Press Tab to cycle through icons, Enter to confirm"
+            )
+        },
+        2 => {
+            let color_preview = match app.custom_category_data.color_index % 7 {
+                0 => "Red",
+                1 => "Blue", 
+                2 => "Green",
+                3 => "Yellow",
+                4 => "Magenta",
+                5 => "Cyan",
+                _ => "White",
+            };
+            (
+                "Step 3/3: Choose a Color",
+                color_preview,
+                "Enter a number 1-7 for color, or Tab to preview"
+            )
+        },
+        _ => ("", "", ""),
     };
     
-    let popup = Paragraph::new(app.input_buffer.as_str())
-        .style(Style::default().fg(Color::White))
-        .block(
-            Block::default()
-                .title(format!("🎨 Create Custom Category - Step {}/3", app.custom_category_step + 1))
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded)
-                .style(Style::default().bg(Color::DarkGray)),
-        );
+    let block = Block::default()
+        .title(format!("🎨 Create Custom Category - {}", title))
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
+        .style(Style::default().bg(Color::Black));
     
-    f.render_widget(popup, area);
+    let inner = block.inner(area);
+    f.render_widget(block, area);
+    
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(1),
+            Constraint::Length(3),
+            Constraint::Length(1),
+            Constraint::Length(2),
+        ])
+        .split(inner);
+    
+    let content_widget = Paragraph::new(content)
+        .style(Style::default().fg(Color::White).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center);
+    f.render_widget(content_widget, chunks[1]);
+    
+    let hint_widget = Paragraph::new(hint)
+        .style(Style::default().fg(Color::Gray))
+        .alignment(Alignment::Center)
+        .wrap(ratatui::widgets::Wrap { trim: true });
+    f.render_widget(hint_widget, chunks[3]);
+    
+    if app.custom_category_step == 1 {
+        let emoji_area = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Percentage(20), Constraint::Percentage(60), Constraint::Percentage(20)])
+            .split(chunks[2])[1];
+            
+        let emojis = App::get_emoji_options();
+        let start = app.custom_category_data.icon_selection.saturating_sub(3);
+        let end = (start + 7).min(emojis.len());
+        
+        let visible_emojis: String = emojis[start..end]
+            .iter()
+            .enumerate()
+            .map(|(i, e)| {
+                if start + i == app.custom_category_data.icon_selection {
+                    format!(" [{}] ", e)
+                } else {
+                    format!("  {}  ", e)
+                }
+            })
+            .collect();
+        
+        let emoji_display = Paragraph::new(visible_emojis)
+            .style(Style::default().fg(Color::White))
+            .alignment(Alignment::Center);
+        f.render_widget(emoji_display, emoji_area);
+    }
 }
 
 fn draw_search_popup(f: &mut Frame, app: &App) {
