@@ -133,7 +133,7 @@ impl App {
 
     pub fn check_message_timeout(&mut self) {
         if let Some((_, time)) = &self.show_message {
-            if time.elapsed().as_secs() >= 3 {
+            if time.elapsed().as_secs() >= 2 {
                 self.show_message = None;
             }
         }
