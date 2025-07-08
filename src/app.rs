@@ -1,6 +1,7 @@
 use crate::models::{Task, TaskStatus, Priority, Category};
 use std::collections::HashMap;
 use uuid::Uuid;
+pub use self::CustomCategoryBuilder;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum InputMode {
@@ -129,6 +130,14 @@ impl App {
             task.title.to_lowercase() == title.to_lowercase() && 
             &task.category == category
         })
+    }
+
+    pub fn check_message_timeout(&mut self) {
+        if let Some((_, time)) = &self.show_message {
+            if time.elapsed().as_secs() >= 3 {
+                self.show_message = None;
+            }
+        }
     }
 
     pub fn add_task(&mut self, title: String) {

@@ -11,7 +11,7 @@ use crossterm::{
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{io, time::Duration};
 
-use crate::app::{App, InputMode};
+use crate::app::{App, InputMode, CustomCategoryBuilder};
 
 fn main() -> Result<()> {
     enable_raw_mode()?;
@@ -98,15 +98,53 @@ fn run_app(
                             app.input_mode = InputMode::SelectCategory;
                             app.input_buffer.clear();
                             app.custom_category_step = 0;
+                            app.custom_category_data = CustomCategoryBuilder::default();
+                        }
+                        KeyCode::Tab => {
+                            match app.custom_category_step {
+                                1 => app.cycle_emoji(),
+                                2 => {
+                                    app.custom_category_data.color_index = 
+                                        (app.custom_category_data.color_index + 1) % 7;
+                                }
+                                _ => {}
+                            }
                         }
                         KeyCode::Enter => {
-                            app.input_mode = InputMode::SelectCategory;
+                            match app.custom_category_step {
+                                0 => {
+                                    if !app.input_buffer.trim().is_empty() {
+                                        app.custom_category_data.name = app.input_buffer.clone();
+                                        app.input_buffer.clear();
+                                        app.custom_category_step = 1;
+                                    }
+                                }
+                                1 => {
+                                    app.custom_category_step = 2;
+                                }
+                                2 => {
+                                    app.complete_custom_category();
+                                }
+                                _ => {}
+                            }
                         }
                         KeyCode::Char(c) => {
-                            app.input_buffer.push(c);
+                            match app.custom_category_step {
+                                0 => app.input_buffer.push(c),
+                                2 => {
+                                    if let Some(digit) = c.to_digit(10) {
+                                        if digit >= 1 && digit <= 7 {
+                                            app.custom_category_data.color_index = (digit - 1) as u8;
+                                        }
+                                    }
+                                }
+                                _ => {}
+                            }
                         }
                         KeyCode::Backspace => {
-                            app.input_buffer.pop();
+                            if app.custom_category_step == 0 {
+                                app.input_buffer.pop();
+                            }
                         }
                         _ => {}
                     },
