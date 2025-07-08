@@ -345,14 +345,18 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
 fn draw_input_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(60, 20, f.size());
     
-    let popup_title = format!("New {} Task", match &app.new_task_category {
-        Category::Work => "Work 💼",
-        Category::Personal => "Personal 🏠",
-        Category::Learning => "Learning 📚",
-        Category::Health => "Health 💪",
-        Category::Finance => "Finance 💰",
-        Category::Custom { name, icon, .. } => &format!("{} {}", name, icon),
-    });
+    let custom_title;
+    let popup_title = match &app.new_task_category {
+        Category::Work => "New Work 💼 Task",
+        Category::Personal => "New Personal 🏠 Task",
+        Category::Learning => "New Learning 📚 Task",
+        Category::Health => "New Health 💪 Task",
+        Category::Finance => "New Finance 💰 Task",
+        Category::Custom { name, icon, .. } => {
+            custom_title = format!("New {} {} Task", name, icon);
+            &custom_title
+        }
+    };
     
     let is_duplicate = app.check_duplicate_task(&app.input_buffer, &app.new_task_category);
     let hint = if is_duplicate {
