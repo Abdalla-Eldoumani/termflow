@@ -23,7 +23,7 @@ pub enum Category {
     Learning,
     Health,
     Finance,
-    Other(String),
+    Custom { name: String, icon: String, color_index: u8 },
 }
 
 impl Category {
@@ -34,7 +34,7 @@ impl Category {
             Category::Learning => "📚",
             Category::Health => "💪",
             Category::Finance => "💰",
-            Category::Other(_) => "📌",
+            Category::Custom { icon, .. } => icon,
         }
     }
     
@@ -46,7 +46,28 @@ impl Category {
             Category::Learning => Color::Magenta,
             Category::Health => Color::Cyan,
             Category::Finance => Color::Yellow,
-            Category::Other(_) => Color::Gray,
+            Category::Custom { color_index, .. } => {
+                match color_index % 7 {
+                    0 => Color::Red,
+                    1 => Color::Blue,
+                    2 => Color::Green,
+                    3 => Color::Yellow,
+                    4 => Color::Magenta,
+                    5 => Color::Cyan,
+                    _ => Color::White,
+                }
+            }
+        }
+    }
+
+    pub fn display_name(&self) -> String {
+        match self {
+            Category::Work => "Work".to_string(),
+            Category::Personal => "Personal".to_string(),
+            Category::Learning => "Learning".to_string(),
+            Category::Health => "Health".to_string(),
+            Category::Finance => "Finance".to_string(),
+            Category::Custom { name, .. } => name.clone(),
         }
     }
 }
