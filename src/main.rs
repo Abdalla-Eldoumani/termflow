@@ -92,11 +92,23 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App, 
                             app.show_temporary_message("Theme changed! 🎨".to_string());
                         }
                         KeyCode::Char(' ') => {
-                            app.toggle_selected_task_status();
-                            if let Some(task) = app.get_selected_task() {
-                                if task.status == TaskStatus::Done {
-                                    app.trigger_celebration();
+                            if let Some(selected_idx) = app.selected_task {
+                                if let Some(task_id) = app.filtered_tasks.get(selected_idx).copied() {
+                                    if let Some(task) = app.tasks.get(&task_id) {
+                                        if task.status != TaskStatus::Done {
+                                            app.toggle_selected_task_status();
+                                        } else {
+                                            app.toggle_selected_task_status();
+                                        }
+                                        if let Some(task) = app.tasks.get(&task_id) {
+                                            if task.status == TaskStatus::Done {
+                                                app.complete_task(task_id);
+                                            }
+                                        }
+                                    }
                                 }
+                            } else {
+                                app.toggle_selected_task_status();
                             }
                         }
                         KeyCode::Char('e') => {
