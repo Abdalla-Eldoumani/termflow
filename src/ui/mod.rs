@@ -424,6 +424,46 @@ fn draw_category_breakdown(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(list, area);
 }
 
+fn draw_activity_heatmap(f: &mut Frame, app: &App, area: Rect) {
+    let mut lines = vec![
+        Line::from("📅 Activity Heatmap (Last 30 days):").style(Style::default().add_modifier(Modifier::BOLD)),
+        Line::from(""),
+    ];
+    
+    let today = chrono::Local::now().date_naive();
+    let mut week_line = vec![Span::raw("    ")];
+    
+    for day in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] {
+        week_line.push(Span::raw(format!("{:>4}", day)));
+    }
+    lines.push(Line::from(week_line));
+    
+    for week in 0..5 {
+        let mut week_spans = vec![Span::raw(format!("W{} ", 5 - week))];
+        
+        for day in 0..7 {
+            let date = today - chrono::Duration::days((week * 7 + day) as i64);
+            let count = app.stats.daily_completions.get(&date).unwrap_or(&0);
+            
+            let (symbol, color) = match *count {
+                0 => ("  □ ", Color::DarkGray),
+                1..=2 => ("  ▫ ", Color::Green),
+                3..=5 => ("  ▪ ", Color::Yellow),
+                _ => ("  ■ ", Color::Red),
+            };
+            
+            week_spans.push(Span::styled(symbol, Style::default().fg(color)));
+        }
+        
+        lines.push(Line::from(week_spans));
+    }
+    
+    let heatmap = Paragraph::new(lines)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    
+    f.render_widget(heatmap, area);
+}
+
 fn draw_search_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(60, 20, f.size());
     
