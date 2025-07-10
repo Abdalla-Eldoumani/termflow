@@ -20,8 +20,9 @@ use ratatui::{
 };
 use std::{io, time::Duration};
 
-use crate::app::{App, InputMode};
+use crate::app::{App, CustomCategoryBuilder, InputMode};
 use crate::models::TaskStatus;
+use crate::ui::centered_rect;
 
 fn main() -> Result<()> {
     enable_raw_mode()?;
