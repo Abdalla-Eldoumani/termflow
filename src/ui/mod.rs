@@ -57,7 +57,7 @@ pub fn draw(f: &mut Frame, app: &App) {
     }
 }
 
-fn draw_welcome_screen(f: &mut Frame, app: &App) {
+pub fn draw_welcome_screen(f: &mut Frame, app: &App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(2)

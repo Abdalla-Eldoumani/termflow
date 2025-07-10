@@ -22,7 +22,7 @@ use std::{io, time::Duration};
 
 use crate::app::{App, CustomCategoryBuilder, InputMode};
 use crate::models::TaskStatus;
-use crate::ui::centered_rect;
+use crate::ui::{centered_rect, draw_welcome_screen};
 
 fn main() -> Result<()> {
     enable_raw_mode()?;
