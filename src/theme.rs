@@ -1,4 +1,4 @@
-use ratatui::style::{Color, Style};
+use ratatui::style::Color;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

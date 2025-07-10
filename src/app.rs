@@ -271,7 +271,7 @@ impl App {
     }
 
     pub fn cycle_theme(&mut self) {
-        use crate::theme::Theme;
+        // use crate::theme::Theme;
         self.config.theme = match self.config.theme.as_str() {
             "cyberpunk" => "forest",
             "forest" => "ocean",
@@ -285,7 +285,7 @@ impl App {
     }
     
     pub fn get_theme_colors(&self) -> crate::theme::ThemeColors {
-        use crate::theme::Theme;
+        // use crate::theme::Theme;
         let theme = match self.config.theme.as_str() {
             "cyberpunk" => Theme::Cyberpunk,
             "forest" => Theme::Forest,
