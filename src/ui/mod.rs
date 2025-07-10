@@ -45,6 +45,56 @@ pub fn draw(f: &mut Frame, app: &App) {
     }
 }
 
+fn draw_welcome_screen(f: &mut Frame, app: &App) {
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(2)
+        .constraints([
+            Constraint::Length(10),
+            Constraint::Length(3),
+            Constraint::Min(0),
+        ])
+        .split(f.size());
+
+    let logo = vec![
+        "╔════════════════════════════════════════════════════════╗",
+        "║  ████████╗███████╗██████╗ ███╗   ███╗               ║",
+        "║  ╚══██╔══╝██╔════╝██╔══██╗████╗ ████║               ║",
+        "║     ██║   █████╗  ██████╔╝██╔████╔██║               ║",
+        "║     ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║               ║",
+        "║     ██║   ███████╗██║  ██║██║ ╚═╝ ██║               ║",
+        "║     ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝               ║",
+        "║          ███████╗██╗      ██████╗ ██╗    ██╗        ║",
+        "║          ██╔════╝██║     ██╔═══██╗██║    ██║        ║",
+        "║          █████╗  ██║     ██║   ██║██║ █╗ ██║        ║",
+        "║          ██╔══╝  ██║     ██║   ██║██║███╗██║        ║",
+        "║          ██║     ███████╗╚██████╔╝╚███╔███╔╝        ║",
+        "║          ╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝         ║",
+        "╚════════════════════════════════════════════════════════╝",
+    ];
+
+    let logo_text = logo.join("\n");
+    let logo_widget = Paragraph::new(logo_text)
+        .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center);
+    
+    f.render_widget(logo_widget, chunks[0]);
+
+    let stats_text = format!(
+        "🔥 Current Streak: {} days | 🏆 Best Streak: {} days | ✅ Total Completed: {}",
+        app.stats.current_streak,
+        app.stats.longest_streak,
+        app.stats.total_tasks_completed
+    );
+    
+    let stats_widget = Paragraph::new(stats_text)
+        .style(Style::default().fg(Color::Yellow))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    
+    f.render_widget(stats_widget, chunks[1]);
+}
+
 fn draw_message(f: &mut Frame, message: &str, area: Rect) {
     let message_widget = Paragraph::new(message)
         .style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
