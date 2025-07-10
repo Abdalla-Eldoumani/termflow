@@ -324,6 +324,69 @@ fn draw_create_category_popup(f: &mut Frame, app: &App) {
     }
 }
 
+fn draw_statistics_dashboard(f: &mut Frame, app: &App) {
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(1)
+        .constraints([
+            Constraint::Length(3),
+            Constraint::Length(10),
+            Constraint::Length(15),
+            Constraint::Min(0),
+        ])
+        .split(f.size());
+
+    let title = Paragraph::new("📊 Statistics Dashboard")
+        .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(title, chunks[0]);
+
+    let stats_chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(25),
+            Constraint::Percentage(25),
+            Constraint::Percentage(25),
+            Constraint::Percentage(25),
+        ])
+        .split(chunks[1]);
+
+    let stats = vec![
+        ("🎯 Total Tasks", app.stats.total_tasks_created.to_string()),
+        ("✅ Completed", app.stats.total_tasks_completed.to_string()),
+        ("🔥 Current Streak", format!("{} days", app.stats.current_streak)),
+        ("🏆 Best Streak", format!("{} days", app.stats.longest_streak)),
+    ];
+
+    for (i, (label, value)) in stats.iter().enumerate() {
+        let stat_block = Block::default()
+            .borders(Borders::ALL)
+            .border_type(BorderType::Rounded)
+            .style(Style::default().fg(Color::Yellow));
+        
+        let inner = stat_block.inner(stats_chunks[i]);
+        f.render_widget(stat_block, stats_chunks[i]);
+        
+        let stat_content = vec![
+            Line::from(label.to_string()).alignment(Alignment::Center),
+            Line::from("").alignment(Alignment::Center),
+            Line::from(Span::styled(
+                value,
+                Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)
+            )).alignment(Alignment::Center),
+        ];
+        
+        let stat_widget = Paragraph::new(stat_content)
+            .alignment(Alignment::Center);
+        f.render_widget(stat_widget, inner);
+    }
+
+    draw_category_breakdown(f, app, chunks[2]);
+    
+    draw_activity_heatmap(f, app, chunks[3]);
+}
+
 fn draw_search_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(60, 20, f.size());
     
