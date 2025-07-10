@@ -149,6 +149,32 @@ impl App {
         self.input_mode = InputMode::Insert;
     }
 
+    pub fn update_streak(&mut self) {
+        let today = chrono::Local::now().date_naive();
+        
+        let completed_today = self.stats.daily_completions.get(&today).unwrap_or(&0);
+        
+        if let Some(last_date) = self.stats.last_active_date {
+            let days_diff = (today - last_date).num_days();
+            
+            if days_diff == 1 && *completed_today > 0 {
+                self.stats.current_streak += 1;
+            } else if days_diff > 1 {
+                self.stats.current_streak = if *completed_today > 0 { 1 } else { 0 };
+            }
+        } else if *completed_today > 0 {
+            self.stats.current_streak = 1;
+        }
+        
+        if self.stats.current_streak > self.stats.longest_streak {
+            self.stats.longest_streak = self.stats.current_streak;
+        }
+        
+        if *completed_today > 0 {
+            self.stats.last_active_date = Some(today);
+        }
+    }
+
     pub fn get_all_categories(&self) -> Vec<Category> {
         let mut categories = vec![
             Category::Personal,
