@@ -387,6 +387,43 @@ fn draw_statistics_dashboard(f: &mut Frame, app: &App) {
     draw_activity_heatmap(f, app, chunks[3]);
 }
 
+fn draw_category_breakdown(f: &mut Frame, app: &App, area: Rect) {
+    let mut category_counts: HashMap<String, usize> = HashMap::new();
+    
+    for task in app.tasks.values() {
+        let category_name = task.category.display_name();
+        *category_counts.entry(category_name).or_insert(0) += 1;
+    }
+    
+    let total_tasks = app.tasks.len().max(1);
+    
+    let mut items: Vec<ListItem> = vec![
+        ListItem::new(Line::from("📂 Tasks by Category:").style(Style::default().add_modifier(Modifier::BOLD))),
+        ListItem::new(""),
+    ];
+    
+    for (category, count) in category_counts.iter() {
+        let percentage = (*count as f32 / total_tasks as f32 * 100.0) as u16;
+        let bar_width = (percentage as usize * 30 / 100).max(1);
+        let bar = "█".repeat(bar_width);
+        let empty = "░".repeat(30 - bar_width);
+        
+        let line = Line::from(vec![
+            Span::raw(format!("{:<15} ", category)),
+            Span::styled(bar, Style::default().fg(Color::Green)),
+            Span::styled(empty, Style::default().fg(Color::DarkGray)),
+            Span::raw(format!(" {}% ({})", percentage, count)),
+        ]);
+        
+        items.push(ListItem::new(line));
+    }
+    
+    let list = List::new(items)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    
+    f.render_widget(list, area);
+}
+
 fn draw_search_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(60, 20, f.size());
     
