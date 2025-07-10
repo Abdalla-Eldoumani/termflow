@@ -14,6 +14,21 @@ pub enum InputMode {
 }
 
 #[derive(Debug)]
+pub struct Animation {
+    pub frames: Vec<String>,
+    pub current_frame: usize,
+    pub last_update: std::time::Instant,
+}
+
+#[derive(Debug)]
+pub struct CustomCategoryBuilder {
+    pub name: String,
+    pub icon: String,
+    pub color_index: u8,
+    pub icon_selection: usize,
+}
+
+#[derive(Debug)]
 pub struct App {
     pub tasks: HashMap<Uuid, Task>,
     pub selected_task: Option<usize>,
@@ -31,14 +46,6 @@ pub struct App {
     pub config: AppConfig,
     pub storage: Storage,
     pub last_save: std::time::Instant,
-}
-
-#[derive(Debug)]
-pub struct CustomCategoryBuilder {
-    pub name: String,
-    pub icon: String,
-    pub color_index: u8,
-    pub icon_selection: usize,
 }
 
 impl Default for CustomCategoryBuilder {
@@ -315,6 +322,22 @@ impl App {
                 self.show_temporary_message("Task deleted!".to_string());
             }
         }
+    }
+
+    pub fn trigger_celebration(&mut self) {
+        let celebration_frames = vec![
+            "🎉", "🎊", "✨", "🌟", "⭐", "💫", "🎆", "🎇"
+        ];
+        
+        let messages = vec![
+            "🎉🎊 AMAZING! You're a productivity superstar! 🎊🎉",
+            "🚀💫 BOOM! Another task bites the dust! 💫🚀",
+            "⚡🔥 INCREDIBLE! You're on fire today! 🔥⚡",
+            "🌟✨ FANTASTIC! Keep up the great work! ✨🌟",
+        ];
+        
+        let random_idx = (self.stats.total_tasks_completed as usize) % messages.len();
+        self.show_temporary_message(messages[random_idx].to_string());
     }
     
     pub fn search_tasks(&mut self, query: &str) {
