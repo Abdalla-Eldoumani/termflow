@@ -8,7 +8,7 @@ use std::fs;
 use std::path::PathBuf;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AppData {
     pub tasks: HashMap<Uuid, Task>,
     pub custom_categories: Vec<Category>,
@@ -17,7 +17,7 @@ pub struct AppData {
     pub config: AppConfig,
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct AppStats {
     pub total_tasks_created: u64,
     pub total_tasks_completed: u64,
@@ -27,11 +27,16 @@ pub struct AppStats {
     pub daily_completions: HashMap<chrono::NaiveDate, u32>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AppConfig {
     pub theme: String,
     pub show_animations: bool,
     pub auto_save: bool,
+}
+
+#[derive(Debug)]
+pub struct Storage {
+    data_path: PathBuf,
 }
 
 impl Default for AppConfig {
