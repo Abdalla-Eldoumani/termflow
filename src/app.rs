@@ -94,6 +94,25 @@ impl App {
         Ok(app)
     }
 
+    pub fn save(&self) -> Result<()> {
+        let data = AppData {
+            tasks: self.tasks.clone(),
+            custom_categories: self.custom_categories.clone(),
+            stats: self.stats.clone(),
+            config: self.config.clone(),
+        };
+        self.storage.save(&data)?;
+        Ok(())
+    }
+
+    pub fn auto_save(&mut self) -> Result<()> {
+        if self.config.auto_save && self.last_save.elapsed().as_secs() > 5 {
+            self.save()?;
+            self.last_save = std::time::Instant::now();
+        }
+        Ok(())
+    }
+
     pub fn show_temporary_message(&mut self, message: String) {
         self.show_message = Some((message, std::time::Instant::now()));
     }
