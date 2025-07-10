@@ -270,6 +270,47 @@ impl App {
         (completed, total, percentage)
     }
 
+    pub fn cycle_theme(&mut self) {
+        use crate::theme::Theme;
+        self.config.theme = match self.config.theme.as_str() {
+            "cyberpunk" => "forest",
+            "forest" => "ocean",
+            "ocean" => "sunset",
+            "sunset" => "midnight",
+            "midnight" => "cyberpunk",
+            _ => "cyberpunk",
+        }.to_string();
+        
+        let _ = self.save();
+    }
+    
+    pub fn get_theme_colors(&self) -> crate::theme::ThemeColors {
+        use crate::theme::Theme;
+        let theme = match self.config.theme.as_str() {
+            "cyberpunk" => Theme::Cyberpunk,
+            "forest" => Theme::Forest,
+            "ocean" => Theme::Ocean,
+            "sunset" => Theme::Sunset,
+            "midnight" => Theme::Midnight,
+            _ => Theme::Cyberpunk,
+        };
+        theme.get_colors()
+    }
+    
+    pub fn export_data(&self) -> Result<()> {
+        let data = AppData {
+            tasks: self.tasks.clone(),
+            custom_categories: self.custom_categories.clone(),
+            stats: self.stats.clone(),
+            config: self.config.clone(),
+        };
+        
+        let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S");
+        let filename = format!("termflow_export_{}.json", timestamp);
+        self.storage.export_to_file(&filename, &data)?;
+        Ok(())
+    }
+
     pub fn get_today_stats(&self) -> (usize, usize) {
         let today = chrono::Local::now().date_naive();
         let today_tasks: Vec<_> = self.tasks.values()

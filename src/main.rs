@@ -1,6 +1,10 @@
 mod app;
 mod models;
 mod ui;
+mod storage;
+mod theme;
+
+use crate::app::{App, CustomCategoryBuilder, InputMode, TaskStatus};
 
 use anyhow::Result;
 use crossterm::{
@@ -11,7 +15,6 @@ use crossterm::{
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{io, time::Duration};
 
-use crate::app::{App, CustomCategoryBuilder, InputMode};
 
 fn main() -> Result<()> {
     enable_raw_mode()?;
