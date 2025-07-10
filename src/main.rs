@@ -23,7 +23,20 @@ fn main() -> Result<()> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let app = App::new();
+    terminal.draw(|f| {
+        let area = f.size();
+        let loading = Paragraph::new("🚀 Loading TermFlow...")
+            .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+            .alignment(Alignment::Center)
+            .block(Block::default().borders(Borders::NONE));
+        
+        let centered = centered_rect(30, 10, area);
+        f.render_widget(loading, centered);
+    })?;
+    
+    std::thread::sleep(std::time::Duration::from_millis(500));
+
+    let app = App::new()?;
     let res = run_app(&mut terminal, app);
 
     disable_raw_mode()?;
@@ -41,10 +54,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn run_app(
-    terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
-    mut app: App,
-) -> Result<()> {
+fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App, ) -> Result<()> {
     loop {
         app.check_message_timeout();
         terminal.draw(|f| ui::draw(f, &app))?;
