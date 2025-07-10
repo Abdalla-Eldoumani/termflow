@@ -11,6 +11,7 @@ pub enum InputMode {
     SelectCategory,
     CreateCategory,
     Search,
+    Statistics,
 }
 
 #[derive(Debug)]
