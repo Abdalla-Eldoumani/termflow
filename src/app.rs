@@ -220,6 +220,10 @@ impl App {
             .with_category(self.new_task_category.clone());
         self.tasks.insert(task.id, task);
         self.update_filtered_tasks();
+        
+        self.stats.total_tasks_created += 1;
+        
+        let _ = self.auto_save();
     }
 
     pub fn complete_task(&mut self, task_id: Uuid) {
