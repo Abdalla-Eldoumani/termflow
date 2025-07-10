@@ -4,17 +4,24 @@ mod ui;
 mod storage;
 mod theme;
 
-use crate::app::{App, CustomCategoryBuilder, InputMode, TaskStatus};
-
 use anyhow::Result;
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use ratatui::{backend::CrosstermBackend, Terminal};
+
+use ratatui::{
+    backend::CrosstermBackend, 
+    Terminal,
+    widgets::{Block, Borders, Paragraph},
+    style::{Color, Modifier, Style},
+    layout::Alignment,
+};
 use std::{io, time::Duration};
 
+use crate::app::{App, InputMode};
+use crate::models::TaskStatus;
 
 fn main() -> Result<()> {
     enable_raw_mode()?;
