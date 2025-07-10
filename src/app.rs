@@ -222,6 +222,29 @@ impl App {
         self.update_filtered_tasks();
     }
 
+    pub fn complete_task(&mut self, task_id: Uuid) {
+        if let Some(task) = self.tasks.get_mut(&task_id) {
+            task.status = TaskStatus::Done;
+            task.updated_at = chrono::Local::now();
+            
+            self.stats.total_tasks_completed += 1;
+            let today = chrono::Local::now().date_naive();
+            *self.stats.daily_completions.entry(today).or_insert(0) += 1;
+            
+            self.update_streak();
+            
+            let messages = vec![
+                "🎉 Awesome job! Task completed!",
+                "💪 You're crushing it! Keep going!",
+                "⚡ Lightning fast! Another one done!",
+                "🌟 Brilliant! You're on fire!",
+                "🚀 Task launched into the done pile!",
+            ];
+            let msg = messages[self.stats.total_tasks_completed as usize % messages.len()];
+            self.show_temporary_message(msg.to_string());
+        }
+    }
+
     pub fn get_completion_stats(&self) -> (usize, usize, f32) {
         let total = self.tasks.len();
         let completed = self.tasks.values()
