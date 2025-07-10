@@ -296,6 +296,24 @@ impl App {
         };
         theme.get_colors()
     }
+
+    pub fn get_random_tip(&self) -> &'static str {
+        let tips = vec![
+            "💡 Tip: Press 's' to view your statistics dashboard!",
+            "💡 Tip: Use 't' to cycle through beautiful themes!",
+            "💡 Tip: Create custom categories with your own emojis!",
+            "💡 Tip: Your data is auto-saved every 5 seconds!",
+            "💡 Tip: Press 'e' to export your data as JSON!",
+            "💡 Tip: Use '/' to search through your tasks!",
+            "💡 Tip: Complete tasks daily to maintain your streak!",
+            "💡 Tip: Press Space to mark tasks as complete!",
+            "💡 Tip: Use Tab while creating tasks to select categories!",
+            "💡 Tip: Your longest streak is saved - try to beat it!",
+        ];
+        
+        let index = (self.stats.total_tasks_created as usize + self.stats.total_tasks_completed as usize) % tips.len();
+        tips[index]
+    }
     
     pub fn export_data(&self) -> Result<()> {
         let data = AppData {
