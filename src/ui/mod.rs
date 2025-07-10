@@ -12,36 +12,45 @@ use crate::{
 };
 
 pub fn draw(f: &mut Frame, app: &App) {
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .margin(1)
-        .constraints([
-            Constraint::Length(5),
-            Constraint::Min(0),
-            Constraint::Length(3),
-        ])
-        .split(f.size());
-
-    draw_header(f, app, chunks[0]);
+    let theme_colors = app.get_theme_colors();
     
-    if let Some((msg, time)) = &app.show_message {
-        if time.elapsed().as_secs() < 3 {
-            draw_message(f, msg, chunks[1]);
-        } else {
-            draw_task_list_grouped(f, app, chunks[1]);
-        }
-    } else {
-        draw_task_list_grouped(f, app, chunks[1]);
-    }
-    
-    draw_status_bar(f, app, chunks[2]);
-
     match app.input_mode {
-        InputMode::Insert => draw_input_popup(f, app),
-        InputMode::SelectCategory => draw_category_popup(f, app),
-        InputMode::CreateCategory => draw_create_category_popup(f, app),
-        InputMode::Search => draw_search_popup(f, app),
-        _ => {}
+        InputMode::Statistics => {
+            draw_statistics_dashboard(f, app);
+        }
+        _ => {
+            let chunks = Layout::default()
+                .direction(Direction::Vertical)
+                .margin(1)
+                .constraints([
+                    Constraint::Length(5),
+                    Constraint::Min(0),
+                    Constraint::Length(3),
+                ])
+                .split(f.size());
+
+            draw_header(f, app, chunks[0]);
+            
+            if let Some((msg, time)) = &app.show_message {
+                if time.elapsed().as_secs() < 3 {
+                    draw_message(f, msg, chunks[1]);
+                } else {
+                    draw_task_list_grouped(f, app, chunks[1]);
+                }
+            } else {
+                draw_task_list_grouped(f, app, chunks[1]);
+            }
+            
+            draw_status_bar(f, app, chunks[2]);
+
+            match app.input_mode {
+                InputMode::Insert => draw_input_popup(f, app),
+                InputMode::SelectCategory => draw_category_popup(f, app),
+                InputMode::CreateCategory => draw_create_category_popup(f, app),
+                InputMode::Search => draw_search_popup(f, app),
+                _ => {}
+            }
+        }
     }
 }
 
