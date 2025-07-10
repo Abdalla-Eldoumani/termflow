@@ -657,32 +657,44 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
         InputMode::SelectCategory => "CATEGORY",
         InputMode::CreateCategory => "CREATE CAT",
         InputMode::Search => "SEARCH",
+        InputMode::Statistics => "STATS",
     };
 
     let key_hints = match app.input_mode {
-        InputMode::Normal => "[n]ew [Space]toggle [d]elete [q]uit [/]search",
+        InputMode::Normal => "[n]ew [s]tats [t]heme [e]xport [Space]toggle [d]elete [q]uit",
         InputMode::Insert => "[Tab]category [Esc]cancel [Enter]save",
         InputMode::SelectCategory => "[Tab]cycle [Enter]select [Esc]cancel",
         InputMode::CreateCategory => "[Esc]cancel [Enter]next",
         InputMode::Search => "[Esc]cancel [Enter]search",
+        InputMode::Statistics => "[Esc/q/s]back to tasks",
     };
 
-    let motivational = if today_done == today_total && today_total > 0 {
-        " 🎉 All done for today!"
-    } else if today_done > 0 {
-        " 💪 Keep going!"
-    } else {
-        " 🌟 Let's start!"
+    let hour = chrono::Local::now().hour();
+    let motivational = match (hour, today_done, today_total) {
+        (5..=11, 0, _) => " ☀️ Good morning! Let's make today amazing!",
+        (5..=11, _, _) => " ☕ Great start! Keep the momentum going!",
+        (12..=16, d, t) if d == t && t > 0 => " 🎉 Afternoon champion! All done!",
+        (12..=16, _, _) => " 💪 Afternoon grind! You've got this!",
+        (17..=20, d, t) if d == t && t > 0 => " 🌅 Evening superstar! Tasks completed!",
+        (17..=20, _, _) => " 🌙 Evening push! Finish strong!",
+        (_, d, t) if d == t && t > 0 => " 🌟 Night owl success! All done!",
+        _ => " 🦉 Late night productivity!",
     };
 
     let status_text = format!(
-        "{} | {} | Today: {}/{}{}", 
-        mode, key_hints, today_done, today_total, motivational
+        "{} | {} | Today: {}/{} | 🔥{}{}", 
+        mode, key_hints, today_done, today_total, app.stats.current_streak, motivational
     );
 
+    let theme_colors = app.get_theme_colors();
     let status = Paragraph::new(status_text)
-        .style(Style::default().fg(Color::White))
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+        .style(Style::default().fg(theme_colors.text))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(theme_colors.border))
+        );
 
     f.render_widget(status, area);
 }
