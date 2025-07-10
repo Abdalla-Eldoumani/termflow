@@ -64,9 +64,36 @@ fn run_app(
                             app.input_mode = InputMode::Search;
                             app.input_buffer.clear();
                         }
-                        KeyCode::Char(' ') => app.toggle_selected_task_status(),
+                        KeyCode::Char('s') => {
+                            app.input_mode = InputMode::Statistics;
+                        }
+                        KeyCode::Char('t') => {
+                            app.cycle_theme();
+                            app.show_temporary_message("Theme changed! 🎨".to_string());
+                        }
+                        KeyCode::Char(' ') => {
+                            app.toggle_selected_task_status();
+                            if let Some(task) = app.get_selected_task() {
+                                if task.status == TaskStatus::Done {
+                                    app.trigger_celebration();
+                                }
+                            }
+                        }
+                        KeyCode::Char('e') => {
+                            if let Err(e) = app.export_data() {
+                                app.show_temporary_message(format!("Export failed: {}", e));
+                            } else {
+                                app.show_temporary_message("Data exported to termflow_export.json! 📁".to_string());
+                            }
+                        }
                         KeyCode::Up | KeyCode::Char('k') => app.move_selection_up(),
                         KeyCode::Down | KeyCode::Char('j') => app.move_selection_down(),
+                        _ => {}
+                    },
+                    InputMode::Statistics => match key.code {
+                        KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('s') => {
+                            app.input_mode = InputMode::Normal;
+                        }
                         _ => {}
                     },
                     InputMode::Insert => match key.code {
