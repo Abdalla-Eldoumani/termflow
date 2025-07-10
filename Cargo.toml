@@ -1,6 +1,6 @@
 [package]
 name = "termflow"
-version = "0.1.0"
+version = "1.1.0"
 edition = "2024"
 
 [dependencies]
@@ -18,3 +18,4 @@ anyhow = "1.0"
 thiserror = "1.0"
 
 directories = "5.0"
+rand = "0.8"
