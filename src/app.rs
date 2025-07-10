@@ -26,7 +26,11 @@ pub struct App {
     pub custom_categories: Vec<Category>,
     pub custom_category_step: usize,
     pub custom_category_data: CustomCategoryBuilder,
-    pub show_message: Option<(String, std::time::Instant)>, 
+    pub show_message: Option<(String, std::time::Instant)>,
+    pub stats: AppStats,
+    pub config: AppConfig,
+    pub storage: Storage,
+    pub last_save: std::time::Instant,
 }
 
 #[derive(Debug)]
@@ -49,9 +53,20 @@ impl Default for CustomCategoryBuilder {
 }
 
 impl App {
-    pub fn new() -> Self {
-        let mut app = Self {
+    pub fn new() -> Result<Self> {
+        let storage = Storage::new()?;
+        let app_data = storage.load().unwrap_or_else(|_| AppData {
             tasks: HashMap::new(),
+            custom_categories: Vec::new(),
+            stats: AppStats::default(),
+            config: AppConfig::default(),
+        });
+        
+        let mut app = Self {
+            tasks: app_data.tasks,
+            custom_categories: app_data.custom_categories,
+            stats: app_data.stats,
+            config: app_data.config,
             selected_task: None,
             filtered_tasks: Vec::new(),
             input_mode: InputMode::Normal,
@@ -59,14 +74,24 @@ impl App {
             should_quit: false,
             new_task_category: Category::Personal,
             category_selection: 0,
-            custom_categories: Vec::new(),
             custom_category_step: 0,
             custom_category_data: CustomCategoryBuilder::default(),
             show_message: None,
+            storage,
+            last_save: std::time::Instant::now(),
         };
         
         app.update_filtered_tasks();
-        app
+        app.update_streak();
+        
+        if app.tasks.is_empty() {
+            app.show_temporary_message("Welcome to TermFlow! Press 'n' to create your first task ✨".to_string());
+        } else {
+            app.show_temporary_message(format!("Welcome back! You have {} tasks. Current streak: {} 🔥", 
+                app.tasks.len(), app.stats.current_streak));
+        }
+        
+        Ok(app)
     }
 
     pub fn show_temporary_message(&mut self, message: String) {
