@@ -49,10 +49,6 @@ impl Default for AppConfig {
     }
 }
 
-pub struct Storage {
-    data_path: PathBuf,
-}
-
 impl Storage {
     pub fn new() -> Result<Self> {
         let project_dirs = ProjectDirs::from("com", "termflow", "TermFlow")
