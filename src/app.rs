@@ -325,7 +325,7 @@ impl App {
         };
         
         let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S");
-        let filename = format!("termflow_export_{}.json", timestamp);
+        let filename = format!("termflow_export.json");
         self.storage.export_to_file(&filename, &data)?;
         Ok(())
     }
