@@ -17,7 +17,6 @@ use crate::{
 pub fn draw(f: &mut Frame, app: &App) {
     let theme_colors = app.get_theme_colors();
     
-    // Show welcome screen for new users
     if app.should_show_welcome() {
         draw_enhanced_welcome_screen(f, app);
         return;
@@ -764,6 +763,121 @@ fn draw_input_popup(f: &mut Frame, app: &App) {
     }
 }
 
+fn draw_enhanced_welcome_screen(f: &mut Frame, app: &App) {
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(2)
+        .constraints([
+            Constraint::Length(12),  // Logo
+            Constraint::Length(8),   // Features
+            Constraint::Length(5),   // Quick start
+            Constraint::Min(0),      // Animation
+        ])
+        .split(f.size());
+
+    // Animated logo with theme colors
+    let theme_colors = app.get_theme_colors();
+    let animation_frame = app.get_welcome_animation_frame();
+    
+    let logo = vec![
+        format!("{}═══════════════════════════════════════════════════════════{}", animation_frame, animation_frame),
+        "║                                                             ║".to_string(),
+        "║  ████████╗███████╗██████╗ ███╗   ███╗                     ║".to_string(),
+        "║  ╚══██╔══╝██╔════╝██╔══██╗████╗ ████║                     ║".to_string(),
+        "║     ██║   █████╗  ██████╔╝██╔████╔██║                     ║".to_string(),
+        "║     ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║                     ║".to_string(),
+        "║     ██║   ███████╗██║  ██║██║ ╚═╝ ██║                     ║".to_string(),
+        "║     ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝                     ║".to_string(),
+        "║          ███████╗██╗      ██████╗ ██╗    ██╗              ║".to_string(),
+        "║          ██╔════╝██║     ██╔═══██╗██║    ██║              ║".to_string(),
+        "║          █████╗  ██║     ██║   ██║██║ █╗ ██║              ║".to_string(),
+        "║          ██╔══╝  ██║     ██║   ██║██║███╗██║              ║".to_string(),
+        "║          ██║     ███████╗╚██████╔╝╚███╔███╔╝              ║".to_string(),
+        "║          ╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝               ║".to_string(),
+        "║                                                             ║".to_string(),
+        format!("{}═══════════════════════════════════════════════════════════{}", animation_frame, animation_frame),
+    ];
+
+    let logo_text = logo.join("\n");
+    let logo_widget = Paragraph::new(logo_text)
+        .style(Style::default().fg(theme_colors.primary).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center);
+    
+    f.render_widget(logo_widget, chunks[0]);
+
+    // Feature highlights
+    let features = vec![
+        "🍅 Pomodoro Timer - Focus sessions with break reminders",
+        "⏰ Time Blocking - Schedule tasks into specific time slots", 
+        "📊 Smart Analytics - Track productivity patterns and streaks",
+        "🎨 Beautiful Themes - Multiple visual themes to choose from",
+        "🎯 Smart Categories - Organize tasks with custom categories",
+        "🔍 Live Search - Instant task filtering as you type",
+    ];
+
+    let feature_items: Vec<ListItem> = features
+        .iter()
+        .map(|feature| ListItem::new(*feature))
+        .collect();
+
+    let features_list = List::new(feature_items)
+        .block(
+            Block::default()
+                .title("✨ Key Features")
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(theme_colors.secondary))
+        )
+        .style(Style::default().fg(Color::White));
+    
+    f.render_widget(features_list, chunks[1]);
+
+    // Quick start guide
+    let quick_start_text = vec![
+        Line::from(vec![
+            Span::styled("🚀 Quick Start: ", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
+            Span::raw("Press "),
+            Span::styled("'n'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::raw(" to create your first task!"),
+        ]),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("💡 Pro Tips: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+            Span::raw("Use "),
+            Span::styled("'p'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::raw(" for Pomodoro, "),
+            Span::styled("'s'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::raw(" for stats, "),
+            Span::styled("'t'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::raw(" for themes"),
+        ]),
+    ];
+
+    let quick_start_widget = Paragraph::new(quick_start_text)
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .title("🎯 Get Started")
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(theme_colors.accent))
+        );
+    
+    f.render_widget(quick_start_widget, chunks[2]);
+
+    // Animated bottom message
+    let bottom_message = format!(
+        "{} Welcome to TermFlow - Your Terminal Productivity Companion! {} Press any key to continue...",
+        animation_frame, animation_frame
+    );
+    
+    let bottom_widget = Paragraph::new(bottom_message)
+        .style(Style::default().fg(theme_colors.primary).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center);
+    
+    f.render_widget(bottom_widget, chunks[3]);
+}
+
 fn draw_pomodoro_timer(f: &mut Frame, app: &App) {
     let area = centered_rect(70, 50, f.size());
     
@@ -807,6 +921,180 @@ fn draw_pomodoro_timer(f: &mut Frame, app: &App) {
         .alignment(Alignment::Center)
         .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
     f.render_widget(session_widget, chunks[0]);
+    
+    // Large timer display - FIXED formatting
+    let timer_display = format!("⏰ {}", time_remaining);
+    let timer_widget = Paragraph::new(timer_display)
+        .style(Style::default().fg(Color::White).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center);
+    f.render_widget(timer_widget, chunks[1]);
+    
+    // Progress bar
+    let progress_widget = Gauge::default()
+        .block(Block::default().title("Progress"))
+        .gauge_style(Style::default().fg(Color::Red).bg(Color::DarkGray))
+        .percent(progress as u16)
+        .label(format!("{}%", progress as u16));
+    f.render_widget(progress_widget, chunks[2]);
+    
+    // Statistics
+    let stats_chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(33),
+            Constraint::Percentage(33),
+            Constraint::Percentage(34),
+        ])
+        .split(chunks[3]);
+    
+    let stats = vec![
+        ("🎯 Total Sessions", total_sessions.to_string()),
+        ("⏱️ Focus Time", format!("{}min", total_focus_time)),
+        ("📅 Today", format!("{} sessions", today_sessions)),
+    ];
+    
+    for (i, (label, value)) in stats.iter().enumerate() {
+        let stat_widget = Paragraph::new(format!("{}\n{}", label, value))
+            .style(Style::default().fg(Color::Yellow))
+            .alignment(Alignment::Center)
+            .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+        f.render_widget(stat_widget, stats_chunks[i]);
+    }
+    
+    // Controls
+    let controls_text = if is_running {
+        "⏸️ [Space] Pause/Resume  |  ⏹️ [S] Stop  |  🚪 [Esc] Back"
+    } else {
+        "🚪 [Esc] Back to Tasks"
+    };
+    
+    let controls_widget = Paragraph::new(controls_text)
+        .style(Style::default().fg(Color::Gray))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(controls_widget, chunks[4]);
+    
+    // Show motivational message if timer is running
+    if is_running && !app.pomodoro_timer.is_paused {
+        let motivation = app.pomodoro_timer.get_motivational_message();
+        let motivation_area = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Percentage(80),
+                Constraint::Length(3),
+                Constraint::Percentage(20),
+            ])
+            .split(f.size())[1];
+        
+        let motivation_widget = Paragraph::new(motivation)
+            .style(Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
+            .alignment(Alignment::Center)
+            .block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Rounded)
+                    .border_style(Style::default().fg(Color::Green))
+            );
+        f.render_widget(motivation_widget, motivation_area);
+    }
+}
+
+fn draw_time_blocking_popup(f: &mut Frame, app: &App) {
+    let area = centered_rect(60, 40, f.size());
+    
+    let block = Block::default()
+        .title("⏰ Time Blocking")
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
+        .border_style(Style::default().fg(Color::Blue))
+        .style(Style::default().bg(Color::Black));
+    
+    let inner = block.inner(area);
+    f.render_widget(block, inner);
+    
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(3),  // Selected task
+            Constraint::Length(8),  // Duration options
+            Constraint::Length(6),  // Upcoming blocks
+            Constraint::Length(3),  // Instructions
+        ])
+        .split(inner);
+    
+    // Show selected task
+    let selected_task_text = if let Some(task) = app.get_selected_task() {
+        format!("📋 Selected Task: {}", task.title)
+    } else {
+        "⚠️ No task selected! Select a task first.".to_string()
+    };
+    
+    let task_widget = Paragraph::new(selected_task_text)
+        .style(Style::default().fg(Color::White))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(task_widget, chunks[0]);
+    
+    // Duration options
+    let options = vec![
+        ("1", "🍅 25 minutes", "Perfect for a Pomodoro session"),
+        ("2", "⚡ 45 minutes", "Deep focus session"),
+        ("3", "🎯 60 minutes", "Extended work block"),
+        ("4", "🚀 90 minutes", "Deep work marathon"),
+    ];
+    
+    let mut option_items = vec![
+        ListItem::new("Choose time block duration:").style(Style::default().add_modifier(Modifier::BOLD)),
+        ListItem::new(""),
+    ];
+    
+    for (key, duration, desc) in options {
+        let item = ListItem::new(Line::from(vec![
+            Span::styled(format!("[{}] ", key), Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::styled(duration, Style::default().fg(Color::Yellow)),
+            Span::raw(" - "),
+            Span::styled(desc, Style::default().fg(Color::Gray)),
+        ]));
+        option_items.push(item);
+    }
+    
+    let options_list = List::new(option_items)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(options_list, chunks[1]);
+    
+    // Upcoming time blocks
+    let upcoming_blocks = app.get_upcoming_time_blocks();
+    let mut block_items = vec![
+        ListItem::new("📅 Upcoming Time Blocks:").style(Style::default().add_modifier(Modifier::BOLD)),
+        ListItem::new(""),
+    ];
+    
+    if upcoming_blocks.is_empty() {
+        block_items.push(ListItem::new("No upcoming time blocks scheduled.").style(Styles(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(session_widget, chunks[0]);fault().fg(Color::Gray)));
+    } else {
+        for (task_title, time, duration) in upcoming_blocks {
+            let item = ListItem::new(Line::from(vec![
+                Span::styled(format!("{} ", time), Style::default().fg(Color::Cyan)),
+                Span::styled(format!("({}) ", duration), Style::default().fg(Color::Yellow)),
+                Span::raw(task_title),
+            ]));
+            block_items.push(item);
+        }
+    }
+    
+    let blocks_list = List::new(block_items)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(blocks_list, chunks[2]);
+    
+    // Instructions
+    let instructions = "Press number key to schedule time block | [Esc] Cancel";
+    let instructions_widget = Paragraph::new(instructions)
+        .style(Style::default().fg(Color::Gray))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(instructions_widget, chunks[3]);
+}
     
     // Large timer display
     let timer_text = format!("⏰ {}", time_remaining);
