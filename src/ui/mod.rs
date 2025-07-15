@@ -896,6 +896,9 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
         InputMode::Statistics => "STATS",
         InputMode::PomodoroTimer => "POMODORO",
         InputMode::TimeBlocking => "TIME BLOCK",
+        InputMode::SmartInsights => "AI INSIGHTS",
+        InputMode::FocusMode => "FOCUS MODE",
+        InputMode::TaskDependencies => "DEPENDENCIES",
     };
 
     let key_hints = match app.input_mode {

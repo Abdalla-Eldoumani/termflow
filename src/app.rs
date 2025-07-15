@@ -16,6 +16,9 @@ pub enum InputMode {
     Statistics,
     PomodoroTimer,
     TimeBlocking,
+    SmartInsights,
+    FocusMode,
+    TaskDependencies,
 }
 
 #[derive(Debug)]
