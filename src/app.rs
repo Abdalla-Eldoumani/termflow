@@ -54,6 +54,9 @@ pub struct App {
     
     pub pomodoro_timer: PomodoroTimer,
     pub timer_task_id: Option<Uuid>,
+    pub show_welcome: bool,
+    pub welcome_animation_frame: usize,
+    pub last_animation_update: std::time::Instant,
 }
 
 impl Default for CustomCategoryBuilder {
