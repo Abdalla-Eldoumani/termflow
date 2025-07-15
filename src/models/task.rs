@@ -122,6 +122,13 @@ pub struct Task {
     pub due_date: Option<DateTime<Local>>,
     pub created_at: DateTime<Local>,
     pub updated_at: DateTime<Local>,
+    
+    // Time management features
+    pub estimated_duration_minutes: Option<u32>,
+    pub actual_duration_minutes: Option<u32>,
+    pub time_blocks: Vec<TimeBlock>,
+    pub recurring_pattern: Option<RecurringPattern>,
+    pub pomodoro_sessions: Vec<PomodoroSession>,
 }
 
 impl Task {
@@ -137,6 +144,11 @@ impl Task {
             due_date: None,
             created_at: now,
             updated_at: now,
+            estimated_duration_minutes: None,
+            actual_duration_minutes: None,
+            time_blocks: Vec::new(),
+            recurring_pattern: None,
+            pomodoro_sessions: Vec::new(),
         }
     }
 
