@@ -80,6 +80,8 @@ impl App {
             config: AppConfig::default(),
         });
         
+        let show_welcome = app_data.tasks.is_empty(); // Check before moving
+        
         let mut app = Self {
             tasks: app_data.tasks,
             custom_categories: app_data.custom_categories,
@@ -99,7 +101,7 @@ impl App {
             last_save: std::time::Instant::now(),
             pomodoro_timer: PomodoroTimer::new(),
             timer_task_id: None,
-            show_welcome: app_data.tasks.is_empty(), // Show welcome screen for new users
+            show_welcome,
             welcome_animation_frame: 0,
             last_animation_update: std::time::Instant::now(),
         };
