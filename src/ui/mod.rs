@@ -11,7 +11,7 @@ use chrono::Timelike;
 
 use crate::{
     app::{App, InputMode},
-    models::{TaskStatus, Priority, Category},
+    models::{TaskStatus, Priority, Category, PomodoroType},
 };
 
 pub fn draw(f: &mut Frame, app: &App) {
@@ -51,6 +51,8 @@ pub fn draw(f: &mut Frame, app: &App) {
                 InputMode::SelectCategory => draw_category_popup(f, app),
                 InputMode::CreateCategory => draw_create_category_popup(f, app),
                 InputMode::Search => draw_search_popup(f, app),
+                InputMode::PomodoroTimer => draw_pomodoro_timer(f, app),
+                InputMode::TimeBlocking => draw_time_blocking_popup(f, app),
                 _ => {}
             }
         }
@@ -670,6 +672,8 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
         InputMode::CreateCategory => "[Esc]cancel [Enter]next",
         InputMode::Search => "[Esc]cancel [Enter]search",
         InputMode::Statistics => "[Esc/q/s]back to tasks",
+        InputMode::PomodoroTimer => "[Space]pause/resume [s]top [Esc]back",
+        InputMode::TimeBlocking => "[1]25min [2]45min [3]60min [4]90min [Esc]cancel",
     };
 
     let hour = chrono::Local::now().hour();

@@ -66,6 +66,7 @@ fn main() -> Result<()> {
 fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App, ) -> Result<()> {
     loop {
         app.check_message_timeout();
+        app.tick_timer(); // Update timer state
         terminal.draw(|f| ui::draw(f, &app))?;
 
         if crossterm::event::poll(Duration::from_millis(250))? {
@@ -122,6 +123,19 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App, 
                         }
                         KeyCode::Up | KeyCode::Char('k') => app.move_selection_up(),
                         KeyCode::Down | KeyCode::Char('j') => app.move_selection_down(),
+                        KeyCode::Char('p') => app.start_pomodoro_for_selected_task(),
+                        KeyCode::Char('b') => {
+                            let break_type = if app.pomodoro_timer.should_start_long_break() {
+                                crate::models::PomodoroType::LongBreak
+                            } else {
+                                crate::models::PomodoroType::ShortBreak
+                            };
+                            app.start_break_session(break_type);
+                            app.input_mode = InputMode::PomodoroTimer;
+                        }
+                        KeyCode::Char('T') => {
+                            app.input_mode = InputMode::TimeBlocking;
+                        }
                         _ => {}
                     },
                     InputMode::Statistics => match key.code {
@@ -247,6 +261,40 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App, 
                             app.input_buffer.pop();
                             let query = app.input_buffer.clone();
                             app.search_tasks(&query);
+                        }
+                        _ => {}
+                    },
+                    InputMode::PomodoroTimer => match key.code {
+                        KeyCode::Esc | KeyCode::Char('q') => {
+                            app.stop_timer();
+                        }
+                        KeyCode::Char(' ') => {
+                            app.pause_resume_timer();
+                        }
+                        KeyCode::Char('s') => {
+                            app.stop_timer();
+                        }
+                        _ => {}
+                    },
+                    InputMode::TimeBlocking => match key.code {
+                        KeyCode::Esc | KeyCode::Char('q') => {
+                            app.input_mode = InputMode::Normal;
+                        }
+                        KeyCode::Char('1') => {
+                            app.add_time_block_to_selected(25);
+                            app.input_mode = InputMode::Normal;
+                        }
+                        KeyCode::Char('2') => {
+                            app.add_time_block_to_selected(45);
+                            app.input_mode = InputMode::Normal;
+                        }
+                        KeyCode::Char('3') => {
+                            app.add_time_block_to_selected(60);
+                            app.input_mode = InputMode::Normal;
+                        }
+                        KeyCode::Char('4') => {
+                            app.add_time_block_to_selected(90);
+                            app.input_mode = InputMode::Normal;
                         }
                         _ => {}
                     },

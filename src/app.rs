@@ -492,4 +492,144 @@ impl App {
             self.selected_task = Some(0);
         }
     }
+
+    // Pomodoro Timer Methods
+    pub fn start_pomodoro_for_selected_task(&mut self) {
+        if let Some(task_id) = self.get_selected_task().map(|t| t.id) {
+            self.pomodoro_timer.start_session(PomodoroType::Work, Some(task_id));
+            self.timer_task_id = Some(task_id);
+            self.input_mode = InputMode::PomodoroTimer;
+            self.show_temporary_message("🍅 Pomodoro session started! Stay focused!".to_string());
+        } else {
+            self.show_temporary_message("Select a task first to start a Pomodoro session!".to_string());
+        }
+    }
+
+    pub fn start_break_session(&mut self, break_type: PomodoroType) {
+        self.pomodoro_timer.start_session(break_type, None);
+        self.timer_task_id = None;
+        let message = match break_type {
+            PomodoroType::ShortBreak => "☕ Short break started! Relax for a moment.",
+            PomodoroType::LongBreak => "🌴 Long break started! You've earned this!",
+            _ => "Break started!",
+        };
+        self.show_temporary_message(message.to_string());
+    }
+
+    pub fn pause_resume_timer(&mut self) {
+        if self.pomodoro_timer.is_paused {
+            self.pomodoro_timer.resume();
+            self.show_temporary_message("⏯️ Timer resumed!".to_string());
+        } else if self.pomodoro_timer.is_running {
+            self.pomodoro_timer.pause();
+            self.show_temporary_message("⏸️ Timer paused.".to_string());
+        }
+    }
+
+    pub fn stop_timer(&mut self) {
+        self.pomodoro_timer.stop();
+        self.timer_task_id = None;
+        self.input_mode = InputMode::Normal;
+        self.show_temporary_message("⏹️ Timer stopped.".to_string());
+    }
+
+    pub fn tick_timer(&mut self) {
+        let event = self.pomodoro_timer.tick();
+        match event {
+            TimerEvent::WorkSessionCompleted => {
+                if let Some(task_id) = self.timer_task_id {
+                    if let Some(task) = self.tasks.get_mut(&task_id) {
+                        task.complete_pomodoro();
+                        let total_time = task.get_total_pomodoro_time();
+                        self.show_temporary_message(format!(
+                            "🎉 Pomodoro completed! Total focus time: {}min", 
+                            total_time
+                        ));
+                    }
+                }
+                
+                // Auto-suggest next session
+                if self.pomodoro_timer.should_start_long_break() {
+                    self.show_temporary_message("🌴 Time for a long break! Press 'b' to start.".to_string());
+                } else {
+                    self.show_temporary_message("☕ Time for a short break! Press 'b' to start.".to_string());
+                }
+                
+                self.input_mode = InputMode::Normal;
+            }
+            TimerEvent::BreakCompleted | TimerEvent::LongBreakCompleted => {
+                self.show_temporary_message("🚀 Break over! Ready to focus? Press 'p' to start Pomodoro.".to_string());
+                self.input_mode = InputMode::Normal;
+            }
+            _ => {}
+        }
+    }
+
+    pub fn get_timer_display_info(&self) -> (String, f32, String, bool) {
+        let time_remaining = self.pomodoro_timer.get_remaining_time_formatted();
+        let progress = self.pomodoro_timer.get_progress_percentage();
+        let session_name = self.pomodoro_timer.get_session_display_name().to_string();
+        let is_running = self.pomodoro_timer.is_running;
+        
+        (time_remaining, progress, session_name, is_running)
+    }
+
+    pub fn get_pomodoro_stats(&self) -> (u32, u32, u32) {
+        let total_sessions = self.pomodoro_timer.completed_sessions;
+        let total_focus_time: u32 = self.tasks.values()
+            .map(|task| task.get_total_pomodoro_time())
+            .sum();
+        let today_sessions = self.get_today_pomodoro_sessions();
+        
+        (total_sessions, total_focus_time, today_sessions)
+    }
+
+    pub fn get_today_pomodoro_sessions(&self) -> u32 {
+        let today = chrono::Local::now().date_naive();
+        self.tasks.values()
+            .flat_map(|task| &task.pomodoro_sessions)
+            .filter(|session| {
+                session.completed && 
+                session.start_time.date_naive() == today &&
+                session.session_type == PomodoroType::Work
+            })
+            .count() as u32
+    }
+
+    pub fn add_time_block_to_selected(&mut self, duration_minutes: u32) {
+        if let Some(task_id) = self.get_selected_task().map(|t| t.id) {
+            if let Some(task) = self.tasks.get_mut(&task_id) {
+                let start_time = chrono::Local::now() + chrono::Duration::minutes(5); // Start in 5 minutes
+                task.add_time_block(start_time, duration_minutes);
+                self.show_temporary_message(format!(
+                    "⏰ Time block added: {}min starting at {}", 
+                    duration_minutes,
+                    start_time.format("%H:%M")
+                ));
+            }
+        } else {
+            self.show_temporary_message("Select a task first to add a time block!".to_string());
+        }
+    }
+
+    pub fn get_upcoming_time_blocks(&self) -> Vec<(String, String, String)> {
+        let now = chrono::Local::now();
+        let mut blocks = Vec::new();
+        
+        for task in self.tasks.values() {
+            for time_block in &task.time_blocks {
+                if time_block.start_time > now {
+                    blocks.push((
+                        task.title.clone(),
+                        time_block.start_time.format("%H:%M").to_string(),
+                        format!("{}min", time_block.duration_minutes),
+                    ));
+                }
+            }
+        }
+        
+        blocks.sort_by(|a, b| a.1.cmp(&b.1)); // Sort by time
+        blocks.truncate(5); // Show only next 5
+        blocks
+    }
 }
