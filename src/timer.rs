@@ -133,7 +133,12 @@ impl PomodoroTimer {
                 self.stop();
                 return event;
             } else {
-                self.remaining_time = self.total_duration - elapsed;
+                // Ensure we don't go below zero
+                if elapsed <= self.total_duration {
+                    self.remaining_time = self.total_duration - elapsed;
+                } else {
+                    self.remaining_time = Duration::from_secs(0);
+                }
                 return TimerEvent::Tick;
             }
         }
