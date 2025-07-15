@@ -663,6 +663,8 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
         InputMode::CreateCategory => "CREATE CAT",
         InputMode::Search => "SEARCH",
         InputMode::Statistics => "STATS",
+        InputMode::PomodoroTimer => "POMODORO",
+        InputMode::TimeBlocking => "TIME BLOCK",
     };
 
     let key_hints = match app.input_mode {
