@@ -1,4 +1,4 @@
-use crate::models::{PomodoroType, PomodoroSession};
+use crate::models::{PomodoroType};
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use std::time::{Duration, Instant};
