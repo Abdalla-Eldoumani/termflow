@@ -14,6 +14,8 @@ pub enum InputMode {
     CreateCategory,
     Search,
     Statistics,
+    PomodoroTimer,
+    TimeBlocking,
 }
 
 #[derive(Debug)]
