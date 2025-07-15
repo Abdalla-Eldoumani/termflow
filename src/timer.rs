@@ -13,7 +13,9 @@ pub struct PomodoroTimer {
     pub remaining_time: Duration,
     pub is_running: bool,
     pub is_paused: bool,
+    #[serde(skip)]
     pub start_time: Option<Instant>,
+    #[serde(skip)]
     pub pause_time: Option<Instant>,
     pub completed_sessions: u32,
     pub settings: PomodoroSettings,
