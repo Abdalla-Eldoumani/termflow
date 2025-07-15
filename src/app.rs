@@ -506,7 +506,7 @@ impl App {
     }
 
     pub fn start_break_session(&mut self, break_type: PomodoroType) {
-        self.pomodoro_timer.start_session(break_type, None);
+        self.pomodoro_timer.start_session(break_type.clone(), None);
         self.timer_task_id = None;
         let message = match break_type {
             PomodoroType::ShortBreak => "☕ Short break started! Relax for a moment.",
