@@ -5,6 +5,7 @@ use crate::timer::{PomodoroTimer, TimerEvent};
 use anyhow::Result;
 use std::collections::HashMap;
 use uuid::Uuid;
+use chrono::Timelike;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum InputMode {
