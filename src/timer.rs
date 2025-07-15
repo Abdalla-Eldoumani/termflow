@@ -121,6 +121,7 @@ impl PomodoroTimer {
             
             if elapsed >= self.total_duration {
                 // Session completed
+                self.remaining_time = Duration::from_secs(0);
                 let event = match self.session_type {
                     PomodoroType::Work => {
                         self.completed_sessions += 1;
@@ -133,12 +134,8 @@ impl PomodoroTimer {
                 self.stop();
                 return event;
             } else {
-                // Ensure we don't go below zero
-                if elapsed <= self.total_duration {
-                    self.remaining_time = self.total_duration - elapsed;
-                } else {
-                    self.remaining_time = Duration::from_secs(0);
-                }
+                // Calculate remaining time properly
+                self.remaining_time = self.total_duration.saturating_sub(elapsed);
                 return TimerEvent::Tick;
             }
         }
