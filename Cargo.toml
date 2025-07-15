@@ -19,3 +19,7 @@ thiserror = "1.0"
 
 directories = "5.0"
 rand = "0.8"
+
+# New dependencies for time management
+rodio = "0.17"  # For audio notifications
+notify-rust = "4.10"  # For system notifications
