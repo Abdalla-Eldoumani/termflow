@@ -182,4 +182,56 @@ impl Task {
     pub fn is_overdue(&self) -> bool {
         self.days_until_due().map(|days| days < 0).unwrap_or(false)
     }
+
+    pub fn with_estimated_duration(mut self, minutes: u32) -> Self {
+        self.estimated_duration_minutes = Some(minutes);
+        self
+    }
+
+    pub fn add_time_block(&mut self, start_time: DateTime<Local>, duration_minutes: u32) {
+        self.time_blocks.push(TimeBlock {
+            start_time,
+            duration_minutes,
+            status: TimeBlockStatus::Scheduled,
+        });
+    }
+
+    pub fn start_pomodoro(&mut self, session_type: PomodoroType, duration_minutes: u32) -> Uuid {
+        let session = PomodoroSession {
+            task_id: self.id,
+            start_time: Local::now(),
+            duration_minutes,
+            completed: false,
+            session_type,
+        };
+        self.pomodoro_sessions.push(session);
+        self.id
+    }
+
+    pub fn complete_pomodoro(&mut self) {
+        if let Some(session) = self.pomodoro_sessions.last_mut() {
+            session.completed = true;
+        }
+    }
+
+    pub fn get_total_pomodoro_time(&self) -> u32 {
+        self.pomodoro_sessions
+            .iter()
+            .filter(|s| s.completed && s.session_type == PomodoroType::Work)
+            .map(|s| s.duration_minutes)
+            .sum()
+    }
+
+    pub fn get_active_time_block(&self) -> Option<&TimeBlock> {
+        self.time_blocks
+            .iter()
+            .find(|block| block.status == TimeBlockStatus::InProgress)
+    }
+
+    pub fn has_scheduled_time_today(&self) -> bool {
+        let today = Local::now().date_naive();
+        self.time_blocks
+            .iter()
+            .any(|block| block.start_time.date_naive() == today)
+    }
 }
