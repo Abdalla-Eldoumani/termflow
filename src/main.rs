@@ -3,6 +3,7 @@ mod models;
 mod ui;
 mod storage;
 mod theme;
+mod timer;
 
 use anyhow::Result;
 use crossterm::{
