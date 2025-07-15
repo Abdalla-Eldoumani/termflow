@@ -17,6 +17,12 @@ use crate::{
 pub fn draw(f: &mut Frame, app: &App) {
     let theme_colors = app.get_theme_colors();
     
+    // Show welcome screen for new users
+    if app.should_show_welcome() {
+        draw_enhanced_welcome_screen(f, app);
+        return;
+    }
+    
     match app.input_mode {
         InputMode::Statistics => {
             draw_statistics_dashboard(f, app);

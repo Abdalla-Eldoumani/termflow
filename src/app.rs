@@ -638,4 +638,27 @@ impl App {
         blocks.truncate(5); // Show only next 5
         blocks
     }
+
+    // Welcome Screen Animation Methods
+    pub fn update_welcome_animation(&mut self) {
+        if self.last_animation_update.elapsed().as_millis() > 500 {
+            self.welcome_animation_frame = (self.welcome_animation_frame + 1) % 8;
+            self.last_animation_update = std::time::Instant::now();
+        }
+    }
+
+    pub fn dismiss_welcome(&mut self) {
+        self.show_welcome = false;
+    }
+
+    pub fn get_welcome_animation_frame(&self) -> &'static str {
+        let frames = [
+            "✨", "🌟", "⭐", "💫", "🌠", "✨", "🌟", "⭐"
+        ];
+        frames[self.welcome_animation_frame]
+    }
+
+    pub fn should_show_welcome(&self) -> bool {
+        self.show_welcome && self.tasks.is_empty()
+    }
 }
