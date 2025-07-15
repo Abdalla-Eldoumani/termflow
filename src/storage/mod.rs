@@ -1,5 +1,4 @@
 use crate::models::{Task, Category};
-use crate::app::CustomCategoryBuilder;
 use anyhow::Result;
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
