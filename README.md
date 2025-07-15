@@ -1,13 +1,35 @@
-# TermFlow
+# TermFlow Enhanced
 
-A **hyper-productive, keyboard-driven Terminal User Interface (TUI)** for managing your day-to-day tasks with advanced time management features. TermFlow combines task management with **Pomodoro Timer**, **Time Blocking**, and **Smart Analytics** - all directly from the command line. Built in Rust with [`ratatui`](https://github.com/ratatui-org/ratatui) + [`crossterm`](https://github.com/crossterm-rs/crossterm), delivering a fast, visually stunning experience across all platforms.
+A **next-generation, AI-powered Terminal User Interface (TUI)** for hyper-productive task management with advanced time management and intelligent insights. TermFlow Enhanced combines traditional task management with **Smart AI Recommendations**, **Pomodoro Timer**, **Focus Mode**, **Task Dependencies**, and **Advanced Analytics** - all directly from the command line. Built in Rust with [`ratatui`](https://github.com/ratatui-org/ratatui) + [`crossterm`](https://github.com/crossterm-rs/crossterm), delivering a lightning-fast, visually stunning experience that rivals GUI applications.
 
 ---
 
-## 🚀 **What's New in TermFlow Enhanced**
+## 🚀 **What's New in TermFlow Enhanced v2.0**
 
-### 🍅 **Advanced Pomodoro Timer System**
-- **Full-featured timer** with work sessions (25min), short breaks (5min), and long breaks (15min)
+### 🧠 **Smart Insights & AI-Powered Recommendations** *(NEW!)*
+- **Productivity Score Analysis** - Real-time calculation based on completion rates, streaks, and focus time
+- **AI-like Recommendations** - Context-aware suggestions that adapt to your work patterns
+- **Weekly Productivity Trends** - Visual charts showing 7-day productivity patterns with insights
+- **Peak Hours Detection** - Identifies your most productive times for optimal task scheduling
+- **Smart Category Balance** - Analyzes task distribution and suggests improvements
+- **Time-based Optimization** - Recommendations that change based on time of day and energy levels
+
+### 🎯 **Focus Mode** *(NEW!)*
+- **Distraction-Free Environment** - Minimalist interface that eliminates visual clutter
+- **ASCII Art Focus Header** - Beautiful visual indicator when focus mode is active
+- **Current Task Spotlight** - Highlights selected task with priority and category information
+- **Integrated Pomodoro Access** - Start focus sessions directly from focus mode
+- **Visual Breathing Room** - Centered, spacious layout designed for deep concentration
+
+### 🔗 **Task Dependencies Manager** *(NEW!)*
+- **Visual Dependency Mapping** - See relationships between tasks at a glance
+- **Smart Task Filtering** - Intelligent suggestions for potential dependencies
+- **Prerequisite Management** - Ensure tasks are completed in the right order
+- **Project Workflow Visualization** - Understand complex project structures
+- **Future-Ready Architecture** - Foundation for advanced project management features
+
+### 🍅 **Enhanced Pomodoro Timer System** *(IMPROVED!)*
+- **Fixed Timer Display** - Perfect MM:SS countdown with smooth decrementing *(Bug Fixed!)*
 - **Visual progress tracking** with animated gauges and real-time countdown
 - **Smart session management** - automatically suggests next session type after completion
 - **Motivational messages** that adapt to your session type and time of day
@@ -15,17 +37,19 @@ A **hyper-productive, keyboard-driven Terminal User Interface (TUI)** for managi
 - **Pause/Resume functionality** with accurate time tracking
 - **Task integration** - start focused Pomodoro sessions for specific tasks
 
-### ⏰ **Smart Time Blocking**
+### ⏰ **Advanced Time Blocking** *(IMPROVED!)*
 - **Flexible scheduling** - 25min (Pomodoro), 45min, 60min, or 90min time blocks
 - **Task-specific scheduling** - assign time blocks to individual tasks
 - **Upcoming schedule view** - see your planned time blocks at a glance
+- **Smart scheduling** - automatically schedules blocks 5 minutes from current time
 - **Seamless integration** with Pomodoro timer for optimal productivity flow
 
-### 🎨 **Enhanced User Experience**
-- **Animated welcome screen** for new users with feature showcase
+### 🎨 **Enhanced Welcome Experience** *(IMPROVED!)*
+- **Full ASCII Art Logo** - Complete TermFlow branding with animated sparkle effects *(Bug Fixed!)*
+- **Feature showcase** highlighting all new capabilities including AI insights
+- **Interactive welcome** - press `'w'` anytime to revisit the welcome screen
 - **Theme-aware styling** that adapts to your chosen visual theme
-- **Professional timer interface** with progress indicators and statistics
-- **Smooth transitions** and visual feedback throughout the application
+- **Quick start guidance** with comprehensive keyboard shortcuts
 
 ---
 
@@ -70,15 +94,15 @@ A **hyper-productive, keyboard-driven Terminal User Interface (TUI)** for managi
 | `/` | Search | Filter tasks by search term |
 | `e` | Export | Export data to JSON file |
 
-### 🍅 **Pomodoro Timer** *(NEW!)*
+### 🍅 **Pomodoro Timer** *(ENHANCED!)*
 | Key | Action | Description |
 |-----|--------|-------------|
 | `p` | Start Pomodoro | Begin 25-minute focus session for selected task |
 | `b` | Start Break | Begin short (5min) or long (15min) break |
-| <kbd>Space</kbd> | Pause/Resume | Pause or resume active timer |
-| `s` | Stop Timer | Stop current timer session |
+| <kbd>Space</kbd> | Pause/Resume | Pause or resume active timer (in timer mode) |
+| `s` | Stop Timer | Stop current timer session (in timer mode) |
 
-### ⏰ **Time Blocking** *(NEW!)*
+### ⏰ **Time Blocking** *(ENHANCED!)*
 | Key | Action | Description |
 |-----|--------|-------------|
 | `T` | Time Block | Open time blocking interface |
@@ -87,11 +111,20 @@ A **hyper-productive, keyboard-driven Terminal User Interface (TUI)** for managi
 | `3` | 60 minutes | Schedule 1-hour extended work block |
 | `4` | 90 minutes | Schedule 90-minute deep work marathon |
 
+### 🧠 **Smart Features** *(NEW!)*
+| Key | Action | Description |
+|-----|--------|-------------|
+| `i` | Smart Insights | AI-powered productivity recommendations and analytics |
+| `f` | Focus Mode | Enter distraction-free work environment |
+| `D` | Dependencies | Manage task relationships and prerequisites |
+| `w` | Welcome Screen | Show animated welcome screen anytime |
+
 ### 📊 **Analytics & Themes**
 | Key | Action | Description |
 |-----|--------|-------------|
 | `s` | Statistics | View productivity dashboard and analytics |
 | `t` | Themes | Cycle through visual themes |
+| `r` | Refresh Insights | Update AI recommendations (in Smart Insights mode) |
 
 ### 🎨 **Task Creation & Categories**
 | Mode | Key | Action |
@@ -137,26 +170,57 @@ The first launch opens TermFlow in full-screen **alternate screen** mode. Simply
 
 ## 🎯 **Productivity Features in Detail**
 
-### 🍅 **Pomodoro Timer Workflow**
+### 🧠 **Smart Insights & AI Recommendations** *(NEW!)*
+1. **Press `i`** to open the Smart Insights dashboard
+2. **Productivity Score** - Real-time analysis of your efficiency (0-100%)
+3. **AI-Powered Suggestions** - Context-aware recommendations that adapt to:
+   - Your completion patterns and work habits
+   - Time of day and energy levels
+   - Task category balance and distribution
+   - Pomodoro usage and focus time
+4. **Weekly Trends** - Visual productivity charts showing 7-day patterns
+5. **Peak Hours Analysis** - Discover your most productive times of day
+6. **Smart Optimization** - Get personalized tips to improve your workflow
+
+### 🎯 **Focus Mode Experience** *(NEW!)*
+1. **Press `f`** to enter distraction-free focus mode
+2. **Minimalist Interface** - Clean, centered layout eliminates visual clutter
+3. **ASCII Art Header** - Beautiful focus mode indicator with motivational text
+4. **Task Spotlight** - Current task highlighted with priority and category
+5. **Integrated Controls** - Start Pomodoro sessions directly from focus mode
+6. **Visual Breathing Room** - Spacious design optimized for deep concentration
+
+### 🔗 **Task Dependencies Management** *(NEW!)*
+1. **Press `D`** to open the Task Dependencies manager
+2. **Visual Relationship Mapping** - See how tasks connect to each other
+3. **Smart Dependency Suggestions** - AI-powered recommendations for task ordering
+4. **Prerequisite Tracking** - Ensure tasks are completed in logical sequence
+5. **Project Workflow Visualization** - Understand complex project structures
+6. **Future-Ready Architecture** - Foundation for advanced project management
+
+### 🍅 **Enhanced Pomodoro Timer Workflow** *(IMPROVED!)*
 1. **Select a task** from your list using arrow keys
 2. **Press `p`** to start a 25-minute focused work session
-3. **Visual feedback** with countdown timer and progress bar
-4. **Automatic break suggestions** when session completes
-5. **Session tracking** - all your focus time is recorded and analyzed
+3. **Perfect Timer Display** - Fixed MM:SS countdown with smooth decrementing
+4. **Visual feedback** with animated progress bars and motivational messages
+5. **Automatic break suggestions** when session completes
+6. **Session tracking** - all your focus time is recorded and analyzed in Smart Insights
 
-### ⏰ **Time Blocking Made Simple**
-1. **Press `T`** to open the time blocking interface
+### ⏰ **Advanced Time Blocking Made Simple** *(IMPROVED!)*
+1. **Press `T`** to open the enhanced time blocking interface
 2. **Choose duration**: 25min (Pomodoro), 45min, 60min, or 90min
-3. **Automatic scheduling** - blocks are scheduled 5 minutes from now
-4. **Visual schedule** - see upcoming time blocks at a glance
-5. **Seamless integration** with Pomodoro timer for optimal flow
+3. **Smart scheduling** - blocks are automatically scheduled 5 minutes from now
+4. **Visual schedule** - see upcoming time blocks with task names and durations
+5. **Seamless integration** with Pomodoro timer and Focus Mode for optimal flow
 
-### 📊 **Smart Analytics Dashboard**
-- **Productivity heatmap** showing your most active days
-- **Category breakdown** with visual progress bars
-- **Streak tracking** with motivational messages
-- **Focus time statistics** from Pomodoro sessions
-- **Daily/weekly/monthly** productivity insights
+### 📊 **Enhanced Analytics Dashboard** *(IMPROVED!)*
+- **Smart Insights Integration** - AI-powered productivity recommendations
+- **Productivity heatmap** showing your most active days with pattern analysis
+- **Category breakdown** with visual progress bars and balance suggestions
+- **Streak tracking** with motivational messages and goal setting
+- **Focus time statistics** from Pomodoro sessions with trend analysis
+- **Peak productivity hours** identification for optimal task scheduling
+- **Daily/weekly/monthly** productivity insights with actionable recommendations
 
 ### 🎨 **Visual Themes**
 Choose from 5 beautiful themes that transform your entire experience:
@@ -250,17 +314,36 @@ TermFlow goes beyond simple task lists:
 
 ---
 
+## 🔧 **Bug Fixes & Improvements in v2.0**
+
+### ✅ **Critical Fixes**
+- **🍅 Pomodoro Timer Display** - Fixed concatenated number display bug; timer now shows perfect MM:SS format
+- **🎨 Welcome Screen ASCII Art** - Fixed missing ASCII logo; now displays complete animated TermFlow branding
+- **⚡ Timer Calculation Logic** - Improved time decrementing algorithm for smooth, accurate countdown
+- **🎯 Welcome Screen Logic** - Enhanced welcome screen visibility and accessibility
+
+### 🚀 **Performance Improvements**
+- **Optimized Rendering** - Faster UI updates and smoother animations
+- **Memory Efficiency** - Reduced memory footprint for better performance
+- **State Management** - Enhanced state transitions and mode switching
+- **Error Handling** - Improved robustness and error recovery
+
+---
+
 ## 📊 **Feature Comparison**
 
-| Feature | TermFlow | Traditional Task Apps | Web-based Tools |
-|---------|----------|----------------------|-----------------|
+| Feature | TermFlow Enhanced | Traditional Task Apps | Web-based Tools |
+|---------|-------------------|----------------------|-----------------|
 | **Terminal Native** | ✅ | ❌ | ❌ |
-| **Pomodoro Timer** | ✅ | ❌ | Some |
-| **Time Blocking** | ✅ | ❌ | Limited |
+| **AI-Powered Insights** | ✅ | ❌ | ❌ |
+| **Focus Mode** | ✅ | ❌ | ❌ |
+| **Task Dependencies** | ✅ | Limited | Some |
+| **Pomodoro Timer** | ✅ Perfect | ❌ | Some |
+| **Time Blocking** | ✅ Advanced | ❌ | Limited |
 | **Offline First** | ✅ | Varies | ❌ |
-| **Keyboard Shortcuts** | ✅ Full | Limited | Limited |
+| **Keyboard Shortcuts** | ✅ Comprehensive | Limited | Limited |
 | **Custom Themes** | ✅ 5 themes | ❌ | Limited |
-| **Analytics Dashboard** | ✅ | Basic | ✅ |
+| **Analytics Dashboard** | ✅ Advanced | Basic | ✅ |
 | **Zero Setup** | ✅ | ❌ | ❌ |
 | **Privacy** | ✅ Local | Varies | ❌ Cloud |
 | **Speed** | ⚡ Instant | Slow | Depends on connection |
