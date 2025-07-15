@@ -27,6 +27,15 @@ pub fn draw(f: &mut Frame, app: &App) {
         InputMode::Statistics => {
             draw_statistics_dashboard(f, app);
         }
+        InputMode::SmartInsights => {
+            draw_smart_insights_dashboard(f, app);
+        }
+        InputMode::FocusMode => {
+            draw_focus_mode_interface(f, app);
+        }
+        InputMode::TaskDependencies => {
+            draw_task_dependencies_popup(f, app);
+        }
         _ => {
             let chunks = Layout::default()
                 .direction(Direction::Vertical)
@@ -59,9 +68,6 @@ pub fn draw(f: &mut Frame, app: &App) {
                 InputMode::Search => draw_search_popup(f, app),
                 InputMode::PomodoroTimer => draw_pomodoro_timer(f, app),
                 InputMode::TimeBlocking => draw_time_blocking_popup(f, app),
-                InputMode::SmartInsights => draw_smart_insights_dashboard(f, app),
-                InputMode::FocusMode => draw_focus_mode_interface(f, app),
-                InputMode::TaskDependencies => draw_task_dependencies_popup(f, app),
                 _ => {}
             }
         }
@@ -73,18 +79,18 @@ fn draw_enhanced_welcome_screen(f: &mut Frame, app: &App) {
         .direction(Direction::Vertical)
         .margin(2)
         .constraints([
-            Constraint::Length(12),  // Logo
+            Constraint::Length(16),  // Logo - increased for full ASCII art
             Constraint::Length(8),   // Features
             Constraint::Length(5),   // Quick start
             Constraint::Min(0),      // Animation
         ])
         .split(f.size());
 
-    // Animated logo with theme colors
+    // Animated logo with theme colors - FIXED ASCII ART
     let theme_colors = app.get_theme_colors();
     let animation_frame = app.get_welcome_animation_frame();
     
-    let logo = vec![
+    let logo_lines = vec![
         format!("{}═══════════════════════════════════════════════════════════{}", animation_frame, animation_frame),
         "║                                                             ║".to_string(),
         "║  ████████╗███████╗██████╗ ███╗   ███╗                     ║".to_string(),
@@ -93,17 +99,17 @@ fn draw_enhanced_welcome_screen(f: &mut Frame, app: &App) {
         "║     ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║                     ║".to_string(),
         "║     ██║   ███████╗██║  ██║██║ ╚═╝ ██║                     ║".to_string(),
         "║     ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝                     ║".to_string(),
+        "║                                                             ║".to_string(),
         "║          ███████╗██╗      ██████╗ ██╗    ██╗              ║".to_string(),
         "║          ██╔════╝██║     ██╔═══██╗██║    ██║              ║".to_string(),
         "║          █████╗  ██║     ██║   ██║██║ █╗ ██║              ║".to_string(),
         "║          ██╔══╝  ██║     ██║   ██║██║███╗██║              ║".to_string(),
         "║          ██║     ███████╗╚██████╔╝╚███╔███╔╝              ║".to_string(),
         "║          ╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝               ║".to_string(),
-        "║                                                             ║".to_string(),
         format!("{}═══════════════════════════════════════════════════════════{}", animation_frame, animation_frame),
     ];
 
-    let logo_text = logo.join("\n");
+    let logo_text = logo_lines.join("\n");
     let logo_widget = Paragraph::new(logo_text)
         .style(Style::default().fg(theme_colors.primary).add_modifier(Modifier::BOLD))
         .alignment(Alignment::Center);
@@ -114,10 +120,10 @@ fn draw_enhanced_welcome_screen(f: &mut Frame, app: &App) {
     let features = vec![
         "🍅 Pomodoro Timer - Focus sessions with break reminders",
         "⏰ Time Blocking - Schedule tasks into specific time slots", 
-        "📊 Smart Analytics - Track productivity patterns and streaks",
-        "🎨 Beautiful Themes - Multiple visual themes to choose from",
-        "🎯 Smart Categories - Organize tasks with custom categories",
-        "🔍 Live Search - Instant task filtering as you type",
+        "🧠 Smart Insights - AI-powered productivity recommendations",
+        "🎯 Focus Mode - Distraction-free work environment",
+        "🔗 Task Dependencies - Manage task relationships",
+        "📊 Advanced Analytics - Track patterns and optimize workflow",
     ];
 
     let feature_items: Vec<ListItem> = features
@@ -128,7 +134,7 @@ fn draw_enhanced_welcome_screen(f: &mut Frame, app: &App) {
     let features_list = List::new(feature_items)
         .block(
             Block::default()
-                .title("✨ Key Features")
+                .title("✨ Enhanced Features")
                 .borders(Borders::ALL)
                 .border_type(BorderType::Rounded)
                 .border_style(Style::default().fg(theme_colors.secondary))
@@ -143,18 +149,19 @@ fn draw_enhanced_welcome_screen(f: &mut Frame, app: &App) {
             Span::styled("🚀 Quick Start: ", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
             Span::raw("Press "),
             Span::styled("'n'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-            Span::raw(" to create your first task!"),
+            Span::raw(" to create tasks, "),
+            Span::styled("'p'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::raw(" for Pomodoro!"),
         ]),
         Line::from(""),
         Line::from(vec![
-            Span::styled("💡 Pro Tips: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-            Span::raw("Use "),
-            Span::styled("'p'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-            Span::raw(" for Pomodoro, "),
-            Span::styled("'s'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-            Span::raw(" for stats, "),
-            Span::styled("'t'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-            Span::raw(" for themes"),
+            Span::styled("🧠 New Features: ", Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD)),
+            Span::styled("'i'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::raw(" Smart Insights, "),
+            Span::styled("'f'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::raw(" Focus Mode, "),
+            Span::styled("'w'", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::raw(" Welcome"),
         ]),
     ];
 
@@ -172,7 +179,7 @@ fn draw_enhanced_welcome_screen(f: &mut Frame, app: &App) {
 
     // Animated bottom message
     let bottom_message = format!(
-        "{} Welcome to TermFlow - Your Terminal Productivity Companion! {} Press any key to continue...",
+        "{} Welcome to TermFlow Enhanced - Your AI-Powered Productivity Suite! {} Press any key to continue...",
         animation_frame, animation_frame
     );
     
@@ -216,9 +223,9 @@ fn draw_header(f: &mut Frame, app: &App, area: Rect) {
         .split(area);
 
     let title_text = if app.tasks.is_empty() {
-        "╔═══════════════════════════════════════════════════════╗\n║  🚀 TermFlow - Let's Get Things Done! 🚀             ║\n╚═══════════════════════════════════════════════════════╝"
+        "╔═══════════════════════════════════════════════════════╗\n║  🚀 TermFlow Enhanced - Let's Get Things Done! 🚀     ║\n╚═══════════════════════════════════════════════════════╝"
     } else {
-        "╔═══════════════════════════════════════════════════════╗\n║  ⚡ TermFlow - Crushing It! ⚡                        ║\n╚═══════════════════════════════════════════════════════╝"
+        "╔═══════════════════════════════════════════════════════╗\n║  ⚡ TermFlow Enhanced - Crushing It! ⚡               ║\n╚═══════════════════════════════════════════════════════╝"
     };
     
     let title = Paragraph::new(title_text)
@@ -236,6 +243,324 @@ fn draw_header(f: &mut Frame, app: &App, area: Rect) {
         .label(format!("{}%", percentage as u16));
     
     f.render_widget(progress, header_chunks[1]);
+}
+
+// Smart Insights Dashboard - NEW IMPRESSIVE FEATURE
+fn draw_smart_insights_dashboard(f: &mut Frame, app: &App) {
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(1)
+        .constraints([
+            Constraint::Length(3),   // Title
+            Constraint::Length(8),   // Productivity Score & Stats
+            Constraint::Length(12),  // Recommendations
+            Constraint::Min(0),      // Weekly Trend & Peak Hours
+        ])
+        .split(f.size());
+
+    // Title
+    let title = Paragraph::new("🧠 Smart Insights & AI Recommendations")
+        .style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(title, chunks[0]);
+
+    // Productivity Score & Key Stats
+    let stats_chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(25),
+            Constraint::Percentage(25),
+            Constraint::Percentage(25),
+            Constraint::Percentage(25),
+        ])
+        .split(chunks[1]);
+
+    let productivity_score = app.get_productivity_score();
+    let focus_time_today = app.get_focus_time_today();
+    let (completed, total, _) = app.get_completion_stats();
+    
+    let smart_stats = vec![
+        ("🎯 Productivity", format!("{:.0}%", productivity_score)),
+        ("🍅 Focus Time", format!("{}min", focus_time_today)),
+        ("⚡ Completion", format!("{}/{}", completed, total)),
+        ("🔥 Streak", format!("{} days", app.stats.current_streak)),
+    ];
+
+    for (i, (label, value)) in smart_stats.iter().enumerate() {
+        let color = match i {
+            0 => if productivity_score >= 80.0 { Color::Green } else if productivity_score >= 60.0 { Color::Yellow } else { Color::Red },
+            1 => if focus_time_today >= 120 { Color::Green } else if focus_time_today >= 60 { Color::Yellow } else { Color::Gray },
+            _ => Color::Cyan,
+        };
+
+        let stat_widget = Paragraph::new(format!("{}\n{}", label, value))
+            .style(Style::default().fg(color))
+            .alignment(Alignment::Center)
+            .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+        f.render_widget(stat_widget, stats_chunks[i]);
+    }
+
+    // Smart Recommendations
+    let recommendations = app.get_smart_recommendations();
+    let mut rec_items = vec![
+        ListItem::new("🤖 AI-Powered Recommendations:").style(Style::default().add_modifier(Modifier::BOLD)),
+        ListItem::new(""),
+    ];
+
+    for rec in recommendations.iter().take(8) {
+        rec_items.push(ListItem::new(rec.as_str()).style(Style::default().fg(Color::White)));
+    }
+
+    let recommendations_list = List::new(rec_items)
+        .block(
+            Block::default()
+                .title("💡 Smart Suggestions")
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(Color::Yellow))
+        );
+    f.render_widget(recommendations_list, chunks[2]);
+
+    // Weekly Trend & Peak Hours
+    let bottom_chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Percentage(60), Constraint::Percentage(40)])
+        .split(chunks[3]);
+
+    // Weekly Productivity Trend
+    let weekly_data = app.get_weekly_productivity_trend();
+    let mut trend_items = vec![
+        ListItem::new("📈 Weekly Productivity Trend:").style(Style::default().add_modifier(Modifier::BOLD)),
+        ListItem::new(""),
+    ];
+
+    for (day, count) in weekly_data {
+        let bar_length = (count * 10).min(20) as usize;
+        let bar = "█".repeat(bar_length);
+        let empty = "░".repeat(20 - bar_length);
+        
+        let line = Line::from(vec![
+            Span::raw(format!("{:<3} ", day)),
+            Span::styled(bar, Style::default().fg(Color::Green)),
+            Span::styled(empty, Style::default().fg(Color::DarkGray)),
+            Span::raw(format!(" {}", count)),
+        ]);
+        trend_items.push(ListItem::new(line));
+    }
+
+    let trend_list = List::new(trend_items)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(trend_list, bottom_chunks[0]);
+
+    // Peak Productivity Hours
+    let peak_hours = app.get_peak_productivity_hours();
+    let mut hours_items = vec![
+        ListItem::new("⏰ Peak Hours:").style(Style::default().add_modifier(Modifier::BOLD)),
+        ListItem::new(""),
+    ];
+
+    for (hour, count) in peak_hours.iter().take(5) {
+        let time_str = format!("{:02}:00", hour);
+        hours_items.push(ListItem::new(
+            format!("{} - {} tasks", time_str, count)
+        ).style(Style::default().fg(Color::Cyan)));
+    }
+
+    if peak_hours.is_empty() {
+        hours_items.push(ListItem::new("Complete more tasks to see patterns").style(Style::default().fg(Color::Gray)));
+    }
+
+    let hours_list = List::new(hours_items)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(hours_list, bottom_chunks[1]);
+}
+
+// Focus Mode Interface - NEW IMPRESSIVE FEATURE
+fn draw_focus_mode_interface(f: &mut Frame, app: &App) {
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(3)
+        .constraints([
+            Constraint::Length(8),   // Focus header
+            Constraint::Min(0),      // Current task focus
+            Constraint::Length(5),   // Controls
+        ])
+        .split(f.size());
+
+    // Focus Mode Header with ASCII art
+    let focus_header_lines = vec![
+        "🎯═══════════════════════════════════════════════════════════🎯",
+        "║                                                             ║",
+        "║                    🧘 FOCUS MODE ACTIVE 🧘                  ║",
+        "║                                                             ║",
+        "║              Minimize distractions, maximize flow           ║",
+        "║                                                             ║",
+        "🎯═══════════════════════════════════════════════════════════🎯",
+    ];
+
+    let header_text = focus_header_lines.join("\n");
+    let header_widget = Paragraph::new(header_text)
+        .style(Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center);
+    f.render_widget(header_widget, chunks[0]);
+
+    // Current Task Focus
+    if let Some(task) = app.get_selected_task() {
+        let task_focus = vec![
+            Line::from(vec![
+                Span::styled("🎯 CURRENT FOCUS: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+            ]),
+            Line::from(""),
+            Line::from(vec![
+                Span::styled(&task.title, Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+            ]),
+            Line::from(""),
+            Line::from(vec![
+                Span::styled("Category: ", Style::default().fg(Color::Gray)),
+                Span::styled(task.category.display_name(), Style::default().fg(task.category.color())),
+            ]),
+            Line::from(vec![
+                Span::styled("Priority: ", Style::default().fg(Color::Gray)),
+                Span::styled(format!("{:?}", task.priority), Style::default().fg(match task.priority {
+                    Priority::High => Color::Red,
+                    Priority::Medium => Color::Yellow,
+                    Priority::Low => Color::Green,
+                })),
+            ]),
+        ];
+
+        let task_widget = Paragraph::new(task_focus)
+            .alignment(Alignment::Center)
+            .block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Rounded)
+                    .border_style(Style::default().fg(Color::Green))
+            );
+        f.render_widget(task_widget, chunks[1]);
+    } else {
+        let no_task_widget = Paragraph::new("No task selected for focus.\nPress Esc to exit and select a task.")
+            .style(Style::default().fg(Color::Gray))
+            .alignment(Alignment::Center)
+            .block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Rounded)
+                    .border_style(Style::default().fg(Color::Gray))
+            );
+        f.render_widget(no_task_widget, chunks[1]);
+    }
+
+    // Focus Mode Controls
+    let controls_text = "🧘 [Space] Toggle Focus State  |  🍅 [P] Start Pomodoro  |  🚪 [Esc] Exit Focus Mode";
+    let controls_widget = Paragraph::new(controls_text)
+        .style(Style::default().fg(Color::Cyan))
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .title("Focus Controls")
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(Color::Cyan))
+        );
+    f.render_widget(controls_widget, chunks[2]);
+}
+
+// Task Dependencies Interface - NEW IMPRESSIVE FEATURE
+fn draw_task_dependencies_popup(f: &mut Frame, app: &App) {
+    let area = centered_rect(70, 60, f.size());
+    
+    let block = Block::default()
+        .title("🔗 Task Dependencies Manager")
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
+        .border_style(Style::default().fg(Color::Magenta))
+        .style(Style::default().bg(Color::Black));
+    
+    let inner = block.inner(area);
+    f.render_widget(block, inner);
+    
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(4),   // Selected task info
+            Constraint::Length(8),   // Available tasks
+            Constraint::Length(6),   // Current dependencies
+            Constraint::Length(4),   // Instructions
+        ])
+        .split(inner);
+
+    // Selected Task Info
+    let selected_info = if let Some(task) = app.get_selected_task() {
+        format!("🎯 Managing dependencies for:\n📋 {}\n🏷️ Category: {}", 
+                task.title, task.category.display_name())
+    } else {
+        "⚠️ No task selected!\nSelect a task first to manage dependencies.".to_string()
+    };
+
+    let info_widget = Paragraph::new(selected_info)
+        .style(Style::default().fg(Color::White))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(info_widget, chunks[0]);
+
+    // Available Tasks (potential dependencies)
+    let mut available_items = vec![
+        ListItem::new("📋 Available Tasks (Potential Dependencies):").style(Style::default().add_modifier(Modifier::BOLD)),
+        ListItem::new(""),
+    ];
+
+    let other_tasks: Vec<_> = app.tasks.values()
+        .filter(|task| {
+            if let Some(selected) = app.get_selected_task() {
+                task.id != selected.id
+            } else {
+                true
+            }
+        })
+        .take(5)
+        .collect();
+
+    if other_tasks.is_empty() {
+        available_items.push(ListItem::new("No other tasks available").style(Style::default().fg(Color::Gray)));
+    } else {
+        for task in other_tasks {
+            let status_icon = match task.status {
+                TaskStatus::Todo => "□",
+                TaskStatus::InProgress => "◐",
+                TaskStatus::Done => "☑",
+            };
+            
+            available_items.push(ListItem::new(
+                format!("{} {} ({})", status_icon, task.title, task.category.display_name())
+            ).style(Style::default().fg(Color::Cyan)));
+        }
+    }
+
+    let available_list = List::new(available_items)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(available_list, chunks[1]);
+
+    // Current Dependencies (placeholder for future implementation)
+    let mut deps_items = vec![
+        ListItem::new("🔗 Current Dependencies:").style(Style::default().add_modifier(Modifier::BOLD)),
+        ListItem::new(""),
+        ListItem::new("🚧 Dependency system coming soon!").style(Style::default().fg(Color::Yellow)),
+        ListItem::new("This will show tasks that must be completed first.").style(Style::default().fg(Color::Gray)),
+    ];
+
+    let deps_list = List::new(deps_items)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(deps_list, chunks[2]);
+
+    // Instructions
+    let instructions = "🔗 [A] Add Dependency  |  🗑️ [D] Remove Dependency  |  🚪 [Esc] Back to Tasks";
+    let instructions_widget = Paragraph::new(instructions)
+        .style(Style::default().fg(Color::Gray))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(instructions_widget, chunks[3]);
 }
 
 fn draw_pomodoro_timer(f: &mut Frame, app: &App) {
@@ -357,1225 +682,4 @@ fn draw_pomodoro_timer(f: &mut Frame, app: &App) {
             );
         f.render_widget(motivation_widget, motivation_area);
     }
-}
-
-fn draw_time_blocking_popup(f: &mut Frame, app: &App) {
-    let area = centered_rect(60, 40, f.size());
-    
-    let block = Block::default()
-        .title("⏰ Time Blocking")
-        .borders(Borders::ALL)
-        .border_type(BorderType::Rounded)
-        .border_style(Style::default().fg(Color::Blue))
-        .style(Style::default().bg(Color::Black));
-    
-    let inner = block.inner(area);
-    f.render_widget(block, inner);
-    
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(3),  // Selected task
-            Constraint::Length(8),  // Duration options
-            Constraint::Length(6),  // Upcoming blocks
-            Constraint::Length(3),  // Instructions
-        ])
-        .split(inner);
-    
-    // Show selected task
-    let selected_task_text = if let Some(task) = app.get_selected_task() {
-        format!("📋 Selected Task: {}", task.title)
-    } else {
-        "⚠️ No task selected! Select a task first.".to_string()
-    };
-    
-    let task_widget = Paragraph::new(selected_task_text)
-        .style(Style::default().fg(Color::White))
-        .alignment(Alignment::Center)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(task_widget, chunks[0]);
-    
-    // Duration options
-    let options = vec![
-        ("1", "🍅 25 minutes", "Perfect for a Pomodoro session"),
-        ("2", "⚡ 45 minutes", "Deep focus session"),
-        ("3", "🎯 60 minutes", "Extended work block"),
-        ("4", "🚀 90 minutes", "Deep work marathon"),
-    ];
-    
-    let mut option_items = vec![
-        ListItem::new("Choose time block duration:").style(Style::default().add_modifier(Modifier::BOLD)),
-        ListItem::new(""),
-    ];
-    
-    for (key, duration, desc) in options {
-        let item = ListItem::new(Line::from(vec![
-            Span::styled(format!("[{}] ", key), Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-            Span::styled(duration, Style::default().fg(Color::Yellow)),
-            Span::raw(" - "),
-            Span::styled(desc, Style::default().fg(Color::Gray)),
-        ]));
-        option_items.push(item);
-    }
-    
-    let options_list = List::new(option_items)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(options_list, chunks[1]);
-    
-    // Upcoming time blocks
-    let upcoming_blocks = app.get_upcoming_time_blocks();
-    let mut block_items = vec![
-        ListItem::new("📅 Upcoming Time Blocks:").style(Style::default().add_modifier(Modifier::BOLD)),
-        ListItem::new(""),
-    ];
-    
-    if upcoming_blocks.is_empty() {
-        block_items.push(ListItem::new("No upcoming time blocks scheduled.").style(Style::default().fg(Color::Gray)));
-    } else {
-        for (task_title, time, duration) in upcoming_blocks {
-            let item = ListItem::new(Line::from(vec![
-                Span::styled(format!("{} ", time), Style::default().fg(Color::Cyan)),
-                Span::styled(format!("({}) ", duration), Style::default().fg(Color::Yellow)),
-                Span::raw(task_title),
-            ]));
-            block_items.push(item);
-        }
-    }
-    
-    let blocks_list = List::new(block_items)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(blocks_list, chunks[2]);
-    
-    // Instructions
-    let instructions = "Press number key to schedule time block | [Esc] Cancel";
-    let instructions_widget = Paragraph::new(instructions)
-        .style(Style::default().fg(Color::Gray))
-        .alignment(Alignment::Center)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(instructions_widget, chunks[3]);
-}
-
-fn draw_category_popup(f: &mut Frame, app: &App) {
-    let area = centered_rect(50, 40, f.size());
-    
-    let mut items = vec![
-        ListItem::new("Select a category:").style(Style::default().add_modifier(Modifier::BOLD)),
-        ListItem::new(""),
-    ];
-    
-    let builtin_categories = vec![
-        (Category::Personal, "Personal tasks, life stuff"),
-        (Category::Work, "Work and professional tasks"),
-        (Category::Learning, "Learning and growth"),
-        (Category::Health, "Health and fitness"),
-        (Category::Finance, "Money matters"),
-    ];
-    
-    let mut all_categories = Vec::new();
-    
-    for (cat, desc) in builtin_categories {
-        all_categories.push(cat.clone());
-        
-        let style = if all_categories.len() - 1 == app.category_selection {
-            Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD)
-        } else {
-            Style::default()
-        };
-        
-        let item = ListItem::new(Line::from(vec![
-            Span::raw(format!("{} ", cat.icon())),
-            Span::styled(cat.display_name(), style.fg(cat.color())),
-            Span::raw(" - "),
-            Span::styled(desc, Style::default().fg(Color::Gray)),
-        ])).style(style);
-        
-        items.push(item);
-    }
-    
-    for cat in &app.custom_categories {
-        all_categories.push(cat.clone());
-        
-        let style = if all_categories.len() - 1 == app.category_selection {
-            Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD)
-        } else {
-            Style::default()
-        };
-        
-        let item = ListItem::new(Line::from(vec![
-            Span::raw(format!("{} ", cat.icon())),
-            Span::styled(cat.display_name(), style.fg(cat.color())),
-            Span::raw(" - "),
-            Span::styled("Custom category", Style::default().fg(Color::Gray)),
-        ])).style(style);
-        
-        items.push(item);
-    }
-    
-    let create_style = if app.category_selection == all_categories.len() {
-        Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD)
-    } else {
-        Style::default()
-    };
-    
-    items.push(ListItem::new(Line::from(vec![
-        Span::raw("➕ "),
-        Span::styled("Create Custom Category", create_style.fg(Color::Cyan)),
-    ])).style(create_style));
-    
-    let list = List::new(items)
-        .block(
-            Block::default()
-                .title("🎯 Choose Category")
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded)
-                .style(Style::default().bg(Color::Black))
-        );
-    
-    f.render_widget(list, area);
-}
-
-fn draw_create_category_popup(f: &mut Frame, app: &App) {
-    let area = centered_rect(60, 30, f.size());
-    
-    let (title, content, hint) = match app.custom_category_step {
-        0 => (
-            "Step 1/3: Category Name",
-            app.input_buffer.as_str(),
-            "Enter a name for your category (e.g., 'Hobbies', 'Side Projects')"
-        ),
-        1 => {
-            let current_emoji = &app.custom_category_data.icon;
-            (
-                "Step 2/3: Choose an Icon",
-                current_emoji.as_str(),
-                "Press Tab to cycle through icons, Enter to confirm"
-            )
-        },
-        2 => {
-            let color_preview = match app.custom_category_data.color_index % 7 {
-                0 => "Red",
-                1 => "Blue", 
-                2 => "Green",
-                3 => "Yellow",
-                4 => "Magenta",
-                5 => "Cyan",
-                _ => "White",
-            };
-            (
-                "Step 3/3: Choose a Color",
-                color_preview,
-                "Enter a number 1-7 for color, or Tab to preview"
-            )
-        },
-        _ => ("", "", ""),
-    };
-    
-    let block = Block::default()
-        .title(format!("🎨 Create Custom Category - {}", title))
-        .borders(Borders::ALL)
-        .border_type(BorderType::Rounded)
-        .style(Style::default().bg(Color::Black));
-    
-    let inner = block.inner(area);
-    f.render_widget(block, area);
-    
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(1),
-            Constraint::Length(3),
-            Constraint::Length(1),
-            Constraint::Length(2),
-        ])
-        .split(inner);
-    
-    let content_widget = Paragraph::new(content)
-        .style(Style::default().fg(Color::White).add_modifier(Modifier::BOLD))
-        .alignment(Alignment::Center);
-    f.render_widget(content_widget, chunks[1]);
-    
-    let hint_widget = Paragraph::new(hint)
-        .style(Style::default().fg(Color::Gray))
-        .alignment(Alignment::Center)
-        .wrap(ratatui::widgets::Wrap { trim: true });
-    f.render_widget(hint_widget, chunks[3]);
-    
-    if app.custom_category_step == 1 {
-        let emoji_area = Layout::default()
-            .direction(Direction::Horizontal)
-            .constraints([Constraint::Percentage(20), Constraint::Percentage(60), Constraint::Percentage(20)])
-            .split(chunks[2])[1];
-            
-        let emojis = crate::app::App::get_emoji_options();
-        let start = app.custom_category_data.icon_selection.saturating_sub(3);
-        let end = (start + 7).min(emojis.len());
-        
-        let visible_emojis: String = emojis[start..end]
-            .iter()
-            .enumerate()
-            .map(|(i, e)| {
-                if start + i == app.custom_category_data.icon_selection {
-                    format!(" [{}] ", e)
-                } else {
-                    format!("  {}  ", e)
-                }
-            })
-            .collect();
-        
-        let emoji_display = Paragraph::new(visible_emojis)
-            .style(Style::default().fg(Color::White))
-            .alignment(Alignment::Center);
-        f.render_widget(emoji_display, emoji_area);
-    }
-}
-
-fn draw_statistics_dashboard(f: &mut Frame, app: &App) {
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .margin(1)
-        .constraints([
-            Constraint::Length(3),
-            Constraint::Length(10),
-            Constraint::Length(15),
-            Constraint::Min(0),
-        ])
-        .split(f.size());
-
-    let title = Paragraph::new("📊 Statistics Dashboard")
-        .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
-        .alignment(Alignment::Center)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(title, chunks[0]);
-
-    let stats_chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage(25),
-            Constraint::Percentage(25),
-            Constraint::Percentage(25),
-            Constraint::Percentage(25),
-        ])
-        .split(chunks[1]);
-
-    let stats = vec![
-        ("🎯 Total Tasks", app.stats.total_tasks_created.to_string()),
-        ("✅ Completed", app.stats.total_tasks_completed.to_string()),
-        ("🔥 Current Streak", format!("{} days", app.stats.current_streak)),
-        ("🏆 Best Streak", format!("{} days", app.stats.longest_streak)),
-    ];
-
-    for (i, (label, value)) in stats.iter().enumerate() {
-        let stat_block = Block::default()
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .style(Style::default().fg(Color::Yellow));
-        
-        let inner = stat_block.inner(stats_chunks[i]);
-        f.render_widget(stat_block, stats_chunks[i]);
-        
-        let stat_content = vec![
-            Line::from(label.to_string()).alignment(Alignment::Center),
-            Line::from("").alignment(Alignment::Center),
-            Line::from(Span::styled(
-                value,
-                Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)
-            )).alignment(Alignment::Center),
-        ];
-        
-        let stat_widget = Paragraph::new(stat_content)
-            .alignment(Alignment::Center);
-        f.render_widget(stat_widget, inner);
-    }
-
-    draw_category_breakdown(f, app, chunks[2]);
-    
-    draw_activity_heatmap(f, app, chunks[3]);
-}
-
-fn draw_category_breakdown(f: &mut Frame, app: &App, area: Rect) {
-    let mut category_counts: HashMap<String, usize> = HashMap::new();
-    
-    for task in app.tasks.values() {
-        let category_name = task.category.display_name();
-        *category_counts.entry(category_name).or_insert(0) += 1;
-    }
-    
-    let total_tasks = app.tasks.len().max(1);
-    
-    let mut items: Vec<ListItem> = vec![
-        ListItem::new(Line::from("📂 Tasks by Category:").style(Style::default().add_modifier(Modifier::BOLD))),
-        ListItem::new(""),
-    ];
-    
-    for (category, count) in category_counts.iter() {
-        let percentage = (*count as f32 / total_tasks as f32 * 100.0) as u16;
-        let bar_width = (percentage as usize * 30 / 100).max(1);
-        let bar = "█".repeat(bar_width);
-        let empty = "░".repeat(30 - bar_width);
-        
-        let line = Line::from(vec![
-            Span::raw(format!("{:<15} ", category)),
-            Span::styled(bar, Style::default().fg(Color::Green)),
-            Span::styled(empty, Style::default().fg(Color::DarkGray)),
-            Span::raw(format!(" {}% ({})", percentage, count)),
-        ]);
-        
-        items.push(ListItem::new(line));
-    }
-    
-    let list = List::new(items)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    
-    f.render_widget(list, area);
-}
-
-fn draw_activity_heatmap(f: &mut Frame, app: &App, area: Rect) {
-    let mut lines = vec![
-        Line::from("📅 Activity Heatmap (Last 30 days):").style(Style::default().add_modifier(Modifier::BOLD)),
-        Line::from(""),
-    ];
-    
-    let today = chrono::Local::now().date_naive();
-    let mut week_line = vec![Span::raw("    ")];
-    
-    for day in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] {
-        week_line.push(Span::raw(format!("{:>4}", day)));
-    }
-    lines.push(Line::from(week_line));
-    
-    for week in 0..5 {
-        let mut week_spans = vec![Span::raw(format!("W{} ", 5 - week))];
-        
-        for day in 0..7 {
-            let date = today - chrono::Duration::days((week * 7 + day) as i64);
-            let count = app.stats.daily_completions.get(&date).unwrap_or(&0);
-            
-            let (symbol, color) = match *count {
-                0 => ("  □ ", Color::DarkGray),
-                1..=2 => ("  ▫ ", Color::Green),
-                3..=5 => ("  ▪ ", Color::Yellow),
-                _ => ("  ■ ", Color::Red),
-            };
-            
-            week_spans.push(Span::styled(symbol, Style::default().fg(color)));
-        }
-        
-        lines.push(Line::from(week_spans));
-    }
-    
-    let heatmap = Paragraph::new(lines)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    
-    f.render_widget(heatmap, area);
-}
-
-fn draw_search_popup(f: &mut Frame, app: &App) {
-    let area = centered_rect(60, 20, f.size());
-    
-    let content = if app.tasks.is_empty() && app.input_buffer.is_empty() {
-        "No tasks to search for! Press 'n' to create your first task."
-    } else if !app.tasks.is_empty() && app.filtered_tasks.is_empty() && !app.input_buffer.is_empty() {
-        "No tasks match your search."
-    } else {
-        app.input_buffer.as_str()
-    };
-    
-    let popup = Paragraph::new(content)
-        .style(Style::default().fg(Color::White))
-        .block(
-            Block::default()
-                .title("Search Tasks")
-                .borders(Borders::ALL)
-                .style(Style::default().bg(Color::DarkGray)),
-        );
-    
-    f.render_widget(popup, area);
-}
-
-fn draw_task_list_grouped(f: &mut Frame, app: &App, area: Rect) {
-    let mut tasks_by_category: std::collections::HashMap<Category, Vec<_>> = std::collections::HashMap::new();
-    
-    for task_id in &app.filtered_tasks {
-        if let Some(task) = app.tasks.get(task_id) {
-            tasks_by_category.entry(task.category.clone()).or_insert_with(Vec::new).push(task);
-        }
-    }
-
-    let mut list_items = Vec::new();
-    let mut current_idx = 0;
-
-    let mut categories: Vec<_> = tasks_by_category.keys().cloned().collect();
-    categories.sort_by(|a, b| a.display_name().cmp(&b.display_name()));
-
-    for category in categories {
-        if let Some(tasks) = tasks_by_category.get(&category) {
-            list_items.push(ListItem::new(Line::from(vec![
-                Span::raw(format!("{} ", category.icon())),
-                Span::styled(
-                    category.display_name(),
-                    Style::default()
-                        .fg(category.color())
-                        .add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
-                ),
-            ])));
-
-            for task in tasks {
-                let status_symbol = match task.status {
-                    TaskStatus::Todo => "□",
-                    TaskStatus::InProgress => "◐",
-                    TaskStatus::Done => "☑",
-                };
-
-                let priority_color = match task.priority {
-                    Priority::High => Color::Red,
-                    Priority::Medium => Color::Yellow,
-                    Priority::Low => Color::Green,
-                };
-
-                let mut content = vec![
-                    Span::raw("  "),
-                    Span::raw(format!("{} ", status_symbol)),
-                    Span::styled(
-                        &task.title,
-                        Style::default().fg(priority_color),
-                    ),
-                ];
-
-                if let Some(days) = task.days_until_due() {
-                    let due_text = match days {
-                        0 => "Today".to_string(),
-                        1 => "Tomorrow".to_string(),
-                        -1 => "Yesterday".to_string(),
-                        d if d < 0 => format!("{}d overdue", -d),
-                        d => format!("{}d", d),
-                    };
-                    
-                    let due_color = if task.is_overdue() {
-                        Color::Red
-                    } else if days <= 1 {
-                        Color::Yellow
-                    } else {
-                        Color::Gray
-                    };
-                    
-                    content.push(Span::raw("  "));
-                    content.push(Span::styled(due_text, Style::default().fg(due_color)));
-                }
-
-                let style = if Some(current_idx) == app.selected_task {
-                    Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD)
-                } else {
-                    Style::default()
-                };
-
-                list_items.push(ListItem::new(Line::from(content)).style(style));
-                current_idx += 1;
-            }
-            
-            list_items.push(ListItem::new(""));
-        }
-    }
-
-    let tasks_list = List::new(list_items)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded)
-                .title("Tasks")
-        );
-
-    f.render_widget(tasks_list, area);
-}
-
-fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
-    let (today_done, today_total) = app.get_today_stats();
-    
-    let mode = match app.input_mode {
-        InputMode::Normal => "NORMAL",
-        InputMode::Insert => "INSERT",
-        InputMode::SelectCategory => "CATEGORY",
-        InputMode::CreateCategory => "CREATE CAT",
-        InputMode::Search => "SEARCH",
-        InputMode::Statistics => "STATS",
-        InputMode::PomodoroTimer => "POMODORO",
-        InputMode::TimeBlocking => "TIME BLOCK",
-        InputMode::SmartInsights => "AI INSIGHTS",
-        InputMode::FocusMode => "FOCUS MODE",
-        InputMode::TaskDependencies => "DEPENDENCIES",
-    };
-
-    let key_hints = match app.input_mode {
-        InputMode::Normal => "[n]ew [p]omodoro [T]ime-block [s]tats [t]heme [e]xport [Space]toggle [d]elete [q]uit",
-        InputMode::Insert => "[Tab]category [Esc]cancel [Enter]save",
-        InputMode::SelectCategory => "[Tab]cycle [Enter]select [Esc]cancel",
-        InputMode::CreateCategory => "[Esc]cancel [Enter]next",
-        InputMode::Search => "[Esc]cancel [Enter]search",
-        InputMode::Statistics => "[Esc/q/s]back to tasks",
-        InputMode::PomodoroTimer => "[Space]pause/resume [s]top [Esc]back",
-        InputMode::TimeBlocking => "[1]25min [2]45min [3]60min [4]90min [Esc]cancel",
-        InputMode::SmartInsights => "[r]refresh insights [Esc]back",
-        InputMode::FocusMode => "[Space]toggle focus [Esc]exit focus",
-        InputMode::TaskDependencies => "[a]dd dependency [d]remove [Esc]back",
-    };
-
-    let hour = chrono::Local::now().hour();
-    let motivational = match (hour, today_done, today_total) {
-        (5..=11, 0, _) => " ☀️ Good morning! Let's make today amazing!",
-        (5..=11, _, _) => " ☕ Great start! Keep the momentum going!",
-        (12..=16, d, t) if d == t && t > 0 => " 🎉 Afternoon champion! All done!",
-        (12..=16, _, _) => " 💪 Afternoon grind! You've got this!",
-        (17..=20, d, t) if d == t && t > 0 => " 🌅 Evening superstar! Tasks completed!",
-        (17..=20, _, _) => " 🌙 Evening push! Finish strong!",
-        (_, d, t) if d == t && t > 0 => " 🌟 Night owl success! All done!",
-        _ => " 🦉 Late night productivity!",
-    };
-
-    let status_text = format!(
-        "{} | {} | Today: {}/{} | 🔥{}{}", 
-        mode, key_hints, today_done, today_total, app.stats.current_streak, motivational
-    );
-
-    let theme_colors = app.get_theme_colors();
-    let status = Paragraph::new(status_text)
-        .style(Style::default().fg(theme_colors.text))
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(theme_colors.border))
-        );
-
-    f.render_widget(status, area);
-}
-
-fn draw_input_popup(f: &mut Frame, app: &App) {
-    let area = centered_rect(60, 20, f.size());
-    
-    let custom_title;
-    let popup_title = match &app.new_task_category {
-        Category::Work => "New Work 💼 Task",
-        Category::Personal => "New Personal 🏠 Task",
-        Category::Learning => "New Learning 📚 Task",
-        Category::Health => "New Health 💪 Task",
-        Category::Finance => "New Finance 💰 Task",
-        Category::Custom { name, icon, .. } => {
-            custom_title = format!("New {} {} Task", name, icon);
-            &custom_title
-        }
-    };
-    
-    let is_duplicate = app.check_duplicate_task(&app.input_buffer, &app.new_task_category);
-    let hint = if is_duplicate {
-        vec![
-            Span::styled("⚠️ ", Style::default().fg(Color::Yellow)),
-            Span::styled("This task already exists in this category!", Style::default().fg(Color::Yellow))
-        ]
-    } else {
-        vec![Span::raw("")]
-    };
-    
-    let input_text = Paragraph::new(app.input_buffer.as_str())
-        .style(Style::default().fg(if is_duplicate { Color::Yellow } else { Color::White }));
-    
-    let block = Block::default()
-        .title(popup_title)
-        .borders(Borders::ALL)
-        .border_type(BorderType::Rounded)
-        .border_style(Style::default().fg(app.new_task_category.color()))
-        .style(Style::default().bg(Color::Black));
-    
-    let inner = block.inner(area);
-    f.render_widget(block, area);
-    
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Length(1), Constraint::Length(1)])
-        .split(inner);
-    
-    f.render_widget(input_text, chunks[0]);
-    if is_duplicate {
-        f.render_widget(Paragraph::new(Line::from(hint)), chunks[1]);
-    }
-}
-
-pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
-    let popup_layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage((100 - percent_y) / 2),
-            Constraint::Percentage(percent_y),
-            Constraint::Percentage((100 - percent_y) / 2),
-        ])
-        .split(r);
-
-    Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage((100 - percent_x) / 2),
-            Constraint::Percentage(percent_x),
-            Constraint::Percentage((100 - percent_x) / 2),
-        ])
-        .split(popup_layout[1])[1]
-}sks 
-to search for! Press 'n' to create your first task."
-    } else if !app.tasks.is_empty() && app.filtered_tasks.is_empty() && !app.input_buffer.is_empty() {
-        "No tasks match your search."
-    } else {
-        app.input_buffer.as_str()
-    };
-    
-    let popup = Paragraph::new(content)
-        .style(Style::default().fg(Color::White))
-        .block(
-            Block::default()
-                .title("Search Tasks")
-                .borders(Borders::ALL)
-                .style(Style::default().bg(Color::DarkGray)),
-        );
-    
-    f.render_widget(popup, area);
-}
-
-// NEW: Smart Insights Dashboard
-fn draw_smart_insights_dashboard(f: &mut Frame, app: &App) {
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .margin(1)
-        .constraints([
-            Constraint::Length(3),   // Title
-            Constraint::Length(8),   // Productivity Score & Stats
-            Constraint::Length(12),  // Recommendations
-            Constraint::Min(0),      // Weekly Trend & Peak Hours
-        ])
-        .split(f.size());
-
-    // Title
-    let title = Paragraph::new("🧠 Smart Insights & AI Recommendations")
-        .style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
-        .alignment(Alignment::Center)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(title, chunks[0]);
-
-    // Productivity Score & Key Stats
-    let stats_chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage(25),
-            Constraint::Percentage(25),
-            Constraint::Percentage(25),
-            Constraint::Percentage(25),
-        ])
-        .split(chunks[1]);
-
-    let productivity_score = app.get_productivity_score();
-    let focus_time_today = app.get_focus_time_today();
-    let (completed, total, _) = app.get_completion_stats();
-    
-    let smart_stats = vec![
-        ("🎯 Productivity Score", format!("{:.0}%", productivity_score)),
-        ("🍅 Focus Time Today", format!("{}min", focus_time_today)),
-        ("⚡ Completion Rate", format!("{}/{}", completed, total)),
-        ("🔥 Current Streak", format!("{} days", app.stats.current_streak)),
-    ];
-
-    for (i, (label, value)) in smart_stats.iter().enumerate() {
-        let color = match i {
-            0 => if productivity_score >= 80.0 { Color::Green } else if productivity_score >= 60.0 { Color::Yellow } else { Color::Red },
-            1 => if focus_time_today >= 120 { Color::Green } else if focus_time_today >= 60 { Color::Yellow } else { Color::Gray },
-            _ => Color::Cyan,
-        };
-
-        let stat_widget = Paragraph::new(format!("{}\n{}", label, value))
-            .style(Style::default().fg(color))
-            .alignment(Alignment::Center)
-            .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-        f.render_widget(stat_widget, stats_chunks[i]);
-    }
-
-    // Smart Recommendations
-    let recommendations = app.get_smart_recommendations();
-    let mut rec_items = vec![
-        ListItem::new("🤖 AI-Powered Recommendations:").style(Style::default().add_modifier(Modifier::BOLD)),
-        ListItem::new(""),
-    ];
-
-    for rec in recommendations.iter().take(8) {
-        rec_items.push(ListItem::new(rec.as_str()).style(Style::default().fg(Color::White)));
-    }
-
-    let recommendations_list = List::new(rec_items)
-        .block(
-            Block::default()
-                .title("💡 Smart Suggestions")
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(Color::Yellow))
-        );
-    f.render_widget(recommendations_list, chunks[2]);
-
-    // Weekly Trend & Peak Hours
-    let bottom_chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(60), Constraint::Percentage(40)])
-        .split(chunks[3]);
-
-    // Weekly Productivity Trend
-    let weekly_data = app.get_weekly_productivity_trend();
-    let mut trend_items = vec![
-        ListItem::new("📈 Weekly Productivity Trend:").style(Style::default().add_modifier(Modifier::BOLD)),
-        ListItem::new(""),
-    ];
-
-    for (day, count) in weekly_data {
-        let bar_length = (count * 10).min(20) as usize;
-        let bar = "█".repeat(bar_length);
-        let empty = "░".repeat(20 - bar_length);
-        
-        let line = Line::from(vec![
-            Span::raw(format!("{:<3} ", day)),
-            Span::styled(bar, Style::default().fg(Color::Green)),
-            Span::styled(empty, Style::default().fg(Color::DarkGray)),
-            Span::raw(format!(" {}", count)),
-        ]);
-        trend_items.push(ListItem::new(line));
-    }
-
-    let trend_list = List::new(trend_items)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(trend_list, bottom_chunks[0]);
-
-    // Peak Productivity Hours
-    let peak_hours = app.get_peak_productivity_hours();
-    let mut hours_items = vec![
-        ListItem::new("⏰ Peak Hours:").style(Style::default().add_modifier(Modifier::BOLD)),
-        ListItem::new(""),
-    ];
-
-    for (hour, count) in peak_hours.iter().take(5) {
-        let time_str = format!("{:02}:00", hour);
-        hours_items.push(ListItem::new(
-            format!("{} - {} tasks", time_str, count)
-        ).style(Style::default().fg(Color::Cyan)));
-    }
-
-    if peak_hours.is_empty() {
-        hours_items.push(ListItem::new("Complete more tasks to see patterns").style(Style::default().fg(Color::Gray)));
-    }
-
-    let hours_list = List::new(hours_items)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(hours_list, bottom_chunks[1]);
-}
-
-// NEW: Focus Mode Interface
-fn draw_focus_mode_interface(f: &mut Frame, app: &App) {
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .margin(3)
-        .constraints([
-            Constraint::Length(8),   // Focus header
-            Constraint::Min(0),      // Current task focus
-            Constraint::Length(5),   // Controls
-        ])
-        .split(f.size());
-
-    // Focus Mode Header
-    let focus_header = vec![
-        "🎯═══════════════════════════════════════════════════════════🎯",
-        "║                                                             ║",
-        "║                    🧘 FOCUS MODE ACTIVE 🧘                  ║",
-        "║                                                             ║",
-        "║              Minimize distractions, maximize flow           ║",
-        "║                                                             ║",
-        "🎯═══════════════════════════════════════════════════════════🎯",
-    ];
-
-    let header_text = focus_header.join("\n");
-    let header_widget = Paragraph::new(header_text)
-        .style(Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
-        .alignment(Alignment::Center);
-    f.render_widget(header_widget, chunks[0]);
-
-    // Current Task Focus
-    if let Some(task) = app.get_selected_task() {
-        let task_focus = vec![
-            Line::from(vec![
-                Span::styled("🎯 CURRENT FOCUS: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-            ]),
-            Line::from(""),
-            Line::from(vec![
-                Span::styled(&task.title, Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
-            ]),
-            Line::from(""),
-            Line::from(vec![
-                Span::styled("Category: ", Style::default().fg(Color::Gray)),
-                Span::styled(task.category.display_name(), Style::default().fg(task.category.color())),
-            ]),
-            Line::from(vec![
-                Span::styled("Priority: ", Style::default().fg(Color::Gray)),
-                Span::styled(format!("{:?}", task.priority), Style::default().fg(match task.priority {
-                    Priority::High => Color::Red,
-                    Priority::Medium => Color::Yellow,
-                    Priority::Low => Color::Green,
-                })),
-            ]),
-        ];
-
-        let task_widget = Paragraph::new(task_focus)
-            .alignment(Alignment::Center)
-            .block(
-                Block::default()
-                    .borders(Borders::ALL)
-                    .border_type(BorderType::Rounded)
-                    .border_style(Style::default().fg(Color::Green))
-            );
-        f.render_widget(task_widget, chunks[1]);
-    } else {
-        let no_task_widget = Paragraph::new("No task selected for focus.\nPress 'Esc' to exit and select a task.")
-            .style(Style::default().fg(Color::Gray))
-            .alignment(Alignment::Center)
-            .block(
-                Block::default()
-                    .borders(Borders::ALL)
-                    .border_type(BorderType::Rounded)
-                    .border_style(Style::default().fg(Color::Gray))
-            );
-        f.render_widget(no_task_widget, chunks[1]);
-    }
-
-    // Focus Mode Controls
-    let controls_text = "🧘 [Space] Toggle Focus State  |  🍅 [P] Start Pomodoro  |  🚪 [Esc] Exit Focus Mode";
-    let controls_widget = Paragraph::new(controls_text)
-        .style(Style::default().fg(Color::Cyan))
-        .alignment(Alignment::Center)
-        .block(
-            Block::default()
-                .title("Focus Controls")
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(Color::Cyan))
-        );
-    f.render_widget(controls_widget, chunks[2]);
-}
-
-// NEW: Task Dependencies Interface
-fn draw_task_dependencies_popup(f: &mut Frame, app: &App) {
-    let area = centered_rect(70, 60, f.size());
-    
-    let block = Block::default()
-        .title("🔗 Task Dependencies Manager")
-        .borders(Borders::ALL)
-        .border_type(BorderType::Rounded)
-        .border_style(Style::default().fg(Color::Magenta))
-        .style(Style::default().bg(Color::Black));
-    
-    let inner = block.inner(area);
-    f.render_widget(block, inner);
-    
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(4),   // Selected task info
-            Constraint::Length(8),   // Available tasks
-            Constraint::Length(6),   // Current dependencies
-            Constraint::Length(4),   // Instructions
-        ])
-        .split(inner);
-
-    // Selected Task Info
-    let selected_info = if let Some(task) = app.get_selected_task() {
-        format!("🎯 Managing dependencies for:\n📋 {}\n🏷️ Category: {}", 
-                task.title, task.category.display_name())
-    } else {
-        "⚠️ No task selected!\nSelect a task first to manage dependencies.".to_string()
-    };
-
-    let info_widget = Paragraph::new(selected_info)
-        .style(Style::default().fg(Color::White))
-        .alignment(Alignment::Center)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(info_widget, chunks[0]);
-
-    // Available Tasks (potential dependencies)
-    let mut available_items = vec![
-        ListItem::new("📋 Available Tasks (Potential Dependencies):").style(Style::default().add_modifier(Modifier::BOLD)),
-        ListItem::new(""),
-    ];
-
-    let other_tasks: Vec<_> = app.tasks.values()
-        .filter(|task| {
-            if let Some(selected) = app.get_selected_task() {
-                task.id != selected.id
-            } else {
-                true
-            }
-        })
-        .take(5)
-        .collect();
-
-    if other_tasks.is_empty() {
-        available_items.push(ListItem::new("No other tasks available").style(Style::default().fg(Color::Gray)));
-    } else {
-        for task in other_tasks {
-            let status_icon = match task.status {
-                crate::models::TaskStatus::Todo => "□",
-                crate::models::TaskStatus::InProgress => "◐",
-                crate::models::TaskStatus::Done => "☑",
-            };
-            
-            available_items.push(ListItem::new(
-                format!("{} {} ({})", status_icon, task.title, task.category.display_name())
-            ).style(Style::default().fg(Color::Cyan)));
-        }
-    }
-
-    let available_list = List::new(available_items)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(available_list, chunks[1]);
-
-    // Current Dependencies (placeholder)
-    let mut deps_items = vec![
-        ListItem::new("🔗 Current Dependencies:").style(Style::default().add_modifier(Modifier::BOLD)),
-        ListItem::new(""),
-        ListItem::new("🚧 Dependency system coming soon!").style(Style::default().fg(Color::Yellow)),
-        ListItem::new("This will show tasks that must be completed first.").style(Style::default().fg(Color::Gray)),
-    ];
-
-    let deps_list = List::new(deps_items)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(deps_list, chunks[2]);
-
-    // Instructions
-    let instructions = "🔗 [A] Add Dependency  |  🗑️ [D] Remove Dependency  |  🚪 [Esc] Back to Tasks";
-    let instructions_widget = Paragraph::new(instructions)
-        .style(Style::default().fg(Color::Gray))
-        .alignment(Alignment::Center)
-        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
-    f.render_widget(instructions_widget, chunks[3]);
-}
-
-fn draw_task_list_grouped(f: &mut Frame, app: &App, area: Rect) {
-    let mut tasks_by_category: std::collections::HashMap<Category, Vec<_>> = std::collections::HashMap::new();
-    
-    for task_id in &app.filtered_tasks {
-        if let Some(task) = app.tasks.get(task_id) {
-            tasks_by_category.entry(task.category.clone()).or_insert_with(Vec::new).push(task);
-        }
-    }
-
-    let mut list_items = Vec::new();
-    let mut current_idx = 0;
-
-    let mut categories: Vec<_> = tasks_by_category.keys().cloned().collect();
-    categories.sort_by(|a, b| a.display_name().cmp(&b.display_name()));
-
-    for category in categories {
-        if let Some(tasks) = tasks_by_category.get(&category) {
-            list_items.push(ListItem::new(Line::from(vec![
-                Span::raw(format!("{} ", category.icon())),
-                Span::styled(
-                    category.display_name(),
-                    Style::default()
-                        .fg(category.color())
-                        .add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
-                ),
-            ])));
-
-            for task in tasks {
-                let status_symbol = match task.status {
-                    TaskStatus::Todo => "□",
-                    TaskStatus::InProgress => "◐",
-                    TaskStatus::Done => "☑",
-                };
-
-                let priority_color = match task.priority {
-                    Priority::High => Color::Red,
-                    Priority::Medium => Color::Yellow,
-                    Priority::Low => Color::Green,
-                };
-
-                let mut content = vec![
-                    Span::raw("  "),
-                    Span::raw(format!("{} ", status_symbol)),
-                    Span::styled(
-                        &task.title,
-                        Style::default().fg(priority_color),
-                    ),
-                ];
-
-                if let Some(days) = task.days_until_due() {
-                    let due_text = match days {
-                        0 => "Today".to_string(),
-                        1 => "Tomorrow".to_string(),
-                        -1 => "Yesterday".to_string(),
-                        d if d < 0 => format!("{}d overdue", -d),
-                        d => format!("{}d", d),
-                    };
-                    
-                    let due_color = if task.is_overdue() {
-                        Color::Red
-                    } else if days <= 1 {
-                        Color::Yellow
-                    } else {
-                        Color::Gray
-                    };
-                    
-                    content.push(Span::raw("  "));
-                    content.push(Span::styled(due_text, Style::default().fg(due_color)));
-                }
-
-                let style = if Some(current_idx) == app.selected_task {
-                    Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD)
-                } else {
-                    Style::default()
-                };
-
-                list_items.push(ListItem::new(Line::from(content)).style(style));
-                current_idx += 1;
-            }
-            
-            list_items.push(ListItem::new(""));
-        }
-    }
-
-    let tasks_list = List::new(list_items)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded)
-                .title("Tasks")
-        );
-
-    f.render_widget(tasks_list, area);
-}
-
-fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
-    let (today_done, today_total) = app.get_today_stats();
-    
-    let mode = match app.input_mode {
-        InputMode::Normal => "NORMAL",
-        InputMode::Insert => "INSERT",
-        InputMode::SelectCategory => "CATEGORY",
-        InputMode::CreateCategory => "CREATE CAT",
-        InputMode::Search => "SEARCH",
-        InputMode::Statistics => "STATS",
-        InputMode::PomodoroTimer => "POMODORO",
-        InputMode::TimeBlocking => "TIME BLOCK",
-        InputMode::SmartInsights => "AI INSIGHTS",
-        InputMode::FocusMode => "FOCUS MODE",
-        InputMode::TaskDependencies => "DEPENDENCIES",
-    };
-
-    let key_hints = match app.input_mode {
-        InputMode::Normal => "[n]ew [p]omodoro [T]ime-block [i]nsights [f]ocus [w]elcome [s]tats [t]heme [e]xport [q]uit",
-        InputMode::Insert => "[Tab]category [Esc]cancel [Enter]save",
-        InputMode::SelectCategory => "[Tab]cycle [Enter]select [Esc]cancel",
-        InputMode::CreateCategory => "[Esc]cancel [Enter]next",
-        InputMode::Search => "[Esc]cancel [Enter]search",
-        InputMode::Statistics => "[Esc/q/s]back to tasks",
-        InputMode::PomodoroTimer => "[Space]pause/resume [s]top [Esc]back",
-        InputMode::TimeBlocking => "[1]25min [2]45min [3]60min [4]90min [Esc]cancel",
-        InputMode::SmartInsights => "[r]refresh insights [Esc]back",
-        InputMode::FocusMode => "[Space]toggle focus [Esc]exit focus",
-        InputMode::TaskDependencies => "[a]dd dependency [d]remove [Esc]back",
-    };
-
-    let hour = chrono::Local::now().hour();
-    let motivational = match (hour, today_done, today_total) {
-        (5..=11, 0, _) => " ☀️ Good morning! Let's make today amazing!",
-        (5..=11, _, _) => " ☕ Great start! Keep the momentum going!",
-        (12..=16, d, t) if d == t && t > 0 => " 🎉 Afternoon champion! All done!",
-        (12..=16, _, _) => " 💪 Afternoon grind! You've got this!",
-        (17..=20, d, t) if d == t && t > 0 => " 🌅 Evening superstar! Tasks completed!",
-        (17..=20, _, _) => " 🌙 Evening push! Finish strong!",
-        (_, d, t) if d == t && t > 0 => " 🌟 Night owl success! All done!",
-        _ => " 🦉 Late night productivity!",
-    };
-
-    let status_text = format!(
-        "{} | {} | Today: {}/{} | 🔥{}{}", 
-        mode, key_hints, today_done, today_total, app.stats.current_streak, motivational
-    );
-
-    let theme_colors = app.get_theme_colors();
-    let status = Paragraph::new(status_text)
-        .style(Style::default().fg(theme_colors.text))
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded)
-                .border_style(Style::default().fg(theme_colors.border))
-        );
-
-    f.render_widget(status, area);
-}
-
-fn draw_input_popup(f: &mut Frame, app: &App) {
-    let area = centered_rect(60, 20, f.size());
-    
-    let custom_title;
-    let popup_title = match &app.new_task_category {
-        Category::Work => "New Work 💼 Task",
-        Category::Personal => "New Personal 🏠 Task",
-        Category::Learning => "New Learning 📚 Task",
-        Category::Health => "New Health 💪 Task",
-        Category::Finance => "New Finance 💰 Task",
-        Category::Custom { name, icon, .. } => {
-            custom_title = format!("New {} {} Task", name, icon);
-            &custom_title
-        }
-    };
-    
-    let is_duplicate = app.check_duplicate_task(&app.input_buffer, &app.new_task_category);
-    let hint = if is_duplicate {
-        vec![
-            Span::styled("⚠️ ", Style::default().fg(Color::Yellow)),
-            Span::styled("This task already exists in this category!", Style::default().fg(Color::Yellow))
-        ]
-    } else {
-        vec![Span::raw("")]
-    };
-    
-    let input_text = Paragraph::new(app.input_buffer.as_str())
-        .style(Style::default().fg(if is_duplicate { Color::Yellow } else { Color::White }));
-    
-    let block = Block::default()
-        .title(popup_title)
-        .borders(Borders::ALL)
-        .border_type(BorderType::Rounded)
-        .border_style(Style::default().fg(app.new_task_category.color()))
-        .style(Style::default().bg(Color::Black));
-    
-    let inner = block.inner(area);
-    f.render_widget(block, area);
-    
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Length(1), Constraint::Length(1)])
-        .split(inner);
-    
-    f.render_widget(input_text, chunks[0]);
-    if is_duplicate {
-        f.render_widget(Paragraph::new(Line::from(hint)), chunks[1]);
-    }
-}
-
-pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
-    let popup_layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage((100 - percent_y) / 2),
-            Constraint::Percentage(percent_y),
-            Constraint::Percentage((100 - percent_y) / 2),
-        ])
-        .split(r);
-
-    Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage((100 - percent_x) / 2),
-            Constraint::Percentage(percent_x),
-            Constraint::Percentage((100 - percent_x) / 2),
-        ])
-        .split(popup_layout[1])[1]
 }
