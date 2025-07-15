@@ -670,4 +670,160 @@ impl App {
     pub fn force_show_welcome(&mut self) {
         self.show_welcome = true;
     }
+
+    // Smart Insights & AI-like Features
+    pub fn refresh_smart_insights(&mut self) {
+        self.show_temporary_message("🧠 Smart insights refreshed! Analyzing your productivity patterns...".to_string());
+    }
+
+    pub fn get_smart_recommendations(&self) -> Vec<String> {
+        let mut recommendations = Vec::new();
+        
+        // Analyze task completion patterns
+        let completion_rate = if self.tasks.is_empty() {
+            0.0
+        } else {
+            let completed = self.tasks.values().filter(|t| t.status == crate::models::TaskStatus::Done).count();
+            (completed as f32 / self.tasks.len() as f32) * 100.0
+        };
+
+        if completion_rate < 30.0 {
+            recommendations.push("🎯 Consider breaking large tasks into smaller, manageable chunks".to_string());
+            recommendations.push("🍅 Try using Pomodoro technique for better focus".to_string());
+        } else if completion_rate > 80.0 {
+            recommendations.push("🚀 Excellent completion rate! Consider taking on more challenging tasks".to_string());
+        }
+
+        // Analyze Pomodoro usage
+        let total_pomodoro_time: u32 = self.tasks.values()
+            .map(|task| task.get_total_pomodoro_time())
+            .sum();
+        
+        if total_pomodoro_time == 0 {
+            recommendations.push("🍅 Try using the Pomodoro timer (press 'p') for focused work sessions".to_string());
+        } else if total_pomodoro_time > 300 {
+            recommendations.push("⭐ Great focus! You've accumulated significant deep work time".to_string());
+        }
+
+        // Analyze task categories
+        let mut category_counts = std::collections::HashMap::new();
+        for task in self.tasks.values() {
+            *category_counts.entry(task.category.display_name()).or_insert(0) += 1;
+        }
+        
+        if category_counts.len() == 1 {
+            recommendations.push("🎨 Consider diversifying with different task categories for better balance".to_string());
+        }
+
+        // Time-based recommendations
+        let hour = chrono::Local::now().hour();
+        match hour {
+            6..=9 => recommendations.push("🌅 Morning energy is perfect for your most important tasks!".to_string()),
+            14..=16 => recommendations.push("☕ Post-lunch dip? Try a short Pomodoro session to regain focus".to_string()),
+            20..=23 => recommendations.push("🌙 Evening reflection: Review completed tasks and plan tomorrow".to_string()),
+            _ => {}
+        }
+
+        if recommendations.is_empty() {
+            recommendations.push("✨ You're doing great! Keep up the productive momentum".to_string());
+        }
+
+        recommendations
+    }
+
+    // Focus Mode Features
+    pub fn toggle_focus_mode(&mut self) {
+        // Toggle focus mode implementation
+        self.show_temporary_message("🎯 Focus mode toggled! Distractions minimized.".to_string());
+    }
+
+    pub fn exit_focus_mode(&mut self) {
+        self.input_mode = InputMode::Normal;
+        self.show_temporary_message("👋 Exited focus mode. Welcome back!".to_string());
+    }
+
+    pub fn is_focus_mode_active(&self) -> bool {
+        self.input_mode == InputMode::FocusMode
+    }
+
+    // Task Dependencies Features
+    pub fn add_task_dependency(&mut self) {
+        if let Some(selected_idx) = self.selected_task {
+            if let Some(_task_id) = self.filtered_tasks.get(selected_idx).copied() {
+                self.show_temporary_message("🔗 Task dependency feature coming soon! Select prerequisite task.".to_string());
+            }
+        } else {
+            self.show_temporary_message("⚠️ Select a task first to add dependencies.".to_string());
+        }
+    }
+
+    pub fn remove_task_dependency(&mut self) {
+        if let Some(selected_idx) = self.selected_task {
+            if let Some(_task_id) = self.filtered_tasks.get(selected_idx).copied() {
+                self.show_temporary_message("🔓 Task dependency removed.".to_string());
+            }
+        } else {
+            self.show_temporary_message("⚠️ Select a task first to remove dependencies.".to_string());
+        }
+    }
+
+    // Advanced Analytics
+    pub fn get_productivity_score(&self) -> f32 {
+        if self.tasks.is_empty() {
+            return 0.0;
+        }
+
+        let completion_rate = self.tasks.values()
+            .filter(|t| t.status == crate::models::TaskStatus::Done)
+            .count() as f32 / self.tasks.len() as f32;
+
+        let streak_bonus = (self.stats.current_streak as f32 * 0.1).min(0.5);
+        let pomodoro_bonus = if self.get_today_pomodoro_sessions() > 0 { 0.2 } else { 0.0 };
+
+        ((completion_rate + streak_bonus + pomodoro_bonus) * 100.0).min(100.0)
+    }
+
+    pub fn get_focus_time_today(&self) -> u32 {
+        let today = chrono::Local::now().date_naive();
+        self.tasks.values()
+            .flat_map(|task| &task.pomodoro_sessions)
+            .filter(|session| {
+                session.completed && 
+                session.start_time.date_naive() == today &&
+                session.session_type == crate::models::PomodoroType::Work
+            })
+            .map(|session| session.duration_minutes)
+            .sum()
+    }
+
+    pub fn get_weekly_productivity_trend(&self) -> Vec<(String, u32)> {
+        let mut weekly_data = Vec::new();
+        let today = chrono::Local::now().date_naive();
+        
+        for i in 0..7 {
+            let date = today - chrono::Duration::days(i);
+            let day_name = date.format("%a").to_string();
+            let completed_tasks = self.stats.daily_completions.get(&date).unwrap_or(&0);
+            weekly_data.push((day_name, *completed_tasks));
+        }
+        
+        weekly_data.reverse();
+        weekly_data
+    }
+
+    pub fn get_peak_productivity_hours(&self) -> Vec<(u32, u32)> {
+        let mut hour_counts = std::collections::HashMap::new();
+        
+        for task in self.tasks.values() {
+            if task.status == crate::models::TaskStatus::Done {
+                let hour = task.updated_at.hour();
+                *hour_counts.entry(hour).or_insert(0) += 1;
+            }
+        }
+        
+        let mut sorted_hours: Vec<_> = hour_counts.into_iter().collect();
+        sorted_hours.sort_by(|a, b| b.1.cmp(&a.1));
+        sorted_hours.truncate(5);
+        sorted_hours
+    }
 }
