@@ -661,6 +661,10 @@ impl App {
     }
 
     pub fn should_show_welcome(&self) -> bool {
-        self.show_welcome && self.tasks.is_empty()
+        self.show_welcome
+    }
+
+    pub fn force_show_welcome(&mut self) {
+        self.show_welcome = true;
     }
 }

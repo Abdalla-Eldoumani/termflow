@@ -142,6 +142,9 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App, 
                         KeyCode::Char('T') => {
                             app.input_mode = InputMode::TimeBlocking;
                         }
+                        KeyCode::Char('w') => {
+                            app.force_show_welcome();
+                        }
                         _ => {}
                     },
                     InputMode::Statistics => match key.code {
