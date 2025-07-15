@@ -16,6 +16,45 @@ pub enum Priority {
     High,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum RecurringPattern {
+    Daily,
+    Weekly,
+    Monthly,
+    Custom { interval_days: u32 },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct TimeBlock {
+    pub start_time: DateTime<Local>,
+    pub duration_minutes: u32,
+    pub status: TimeBlockStatus,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum TimeBlockStatus {
+    Scheduled,
+    InProgress,
+    Completed,
+    Skipped,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct PomodoroSession {
+    pub task_id: Uuid,
+    pub start_time: DateTime<Local>,
+    pub duration_minutes: u32,
+    pub completed: bool,
+    pub session_type: PomodoroType,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum PomodoroType {
+    Work,
+    ShortBreak,
+    LongBreak,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum Category {
     Work,
