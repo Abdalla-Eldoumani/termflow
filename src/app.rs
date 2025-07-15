@@ -51,6 +51,9 @@ pub struct App {
     pub config: AppConfig,
     pub storage: Storage,
     pub last_save: std::time::Instant,
+    
+    pub pomodoro_timer: PomodoroTimer,
+    pub timer_task_id: Option<Uuid>,
 }
 
 impl Default for CustomCategoryBuilder {
@@ -91,6 +94,8 @@ impl App {
             show_message: None,
             storage,
             last_save: std::time::Instant::now(),
+            pomodoro_timer: PomodoroTimer::new(),
+            timer_task_id: None,
         };
         
         app.update_filtered_tasks();
