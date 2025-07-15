@@ -910,6 +910,9 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
         InputMode::Statistics => "[Esc/q/s]back to tasks",
         InputMode::PomodoroTimer => "[Space]pause/resume [s]top [Esc]back",
         InputMode::TimeBlocking => "[1]25min [2]45min [3]60min [4]90min [Esc]cancel",
+        InputMode::SmartInsights => "[r]refresh insights [Esc]back",
+        InputMode::FocusMode => "[Space]toggle focus [Esc]exit focus",
+        InputMode::TaskDependencies => "[a]dd dependency [d]remove [Esc]back",
     };
 
     let hour = chrono::Local::now().hour();

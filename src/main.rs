@@ -145,6 +145,15 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App, 
                         KeyCode::Char('w') => {
                             app.force_show_welcome();
                         }
+                        KeyCode::Char('i') => {
+                            app.input_mode = InputMode::SmartInsights;
+                        }
+                        KeyCode::Char('f') => {
+                            app.input_mode = InputMode::FocusMode;
+                        }
+                        KeyCode::Char('D') => {
+                            app.input_mode = InputMode::TaskDependencies;
+                        }
                         _ => {}
                     },
                     InputMode::Statistics => match key.code {
@@ -304,6 +313,36 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App, 
                         KeyCode::Char('4') => {
                             app.add_time_block_to_selected(90);
                             app.input_mode = InputMode::Normal;
+                        }
+                        _ => {}
+                    },
+                    InputMode::SmartInsights => match key.code {
+                        KeyCode::Esc | KeyCode::Char('q') => {
+                            app.input_mode = InputMode::Normal;
+                        }
+                        KeyCode::Char('r') => {
+                            app.refresh_smart_insights();
+                        }
+                        _ => {}
+                    },
+                    InputMode::FocusMode => match key.code {
+                        KeyCode::Esc | KeyCode::Char('q') => {
+                            app.exit_focus_mode();
+                        }
+                        KeyCode::Char(' ') => {
+                            app.toggle_focus_mode();
+                        }
+                        _ => {}
+                    },
+                    InputMode::TaskDependencies => match key.code {
+                        KeyCode::Esc | KeyCode::Char('q') => {
+                            app.input_mode = InputMode::Normal;
+                        }
+                        KeyCode::Char('a') => {
+                            app.add_task_dependency();
+                        }
+                        KeyCode::Char('d') => {
+                            app.remove_task_dependency();
                         }
                         _ => {}
                     },
