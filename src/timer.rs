@@ -157,6 +157,27 @@ impl PomodoroTimer {
         format!("{:02}:{:02}", minutes, seconds)
     }
 
+    pub fn get_elapsed_time_formatted(&self) -> String {
+        if let Some(start_time) = self.start_time {
+            let elapsed = if self.is_paused {
+                if let Some(pause_time) = self.pause_time {
+                    pause_time.duration_since(start_time)
+                } else {
+                    start_time.elapsed()
+                }
+            } else {
+                start_time.elapsed()
+            };
+            
+            let total_seconds = elapsed.as_secs();
+            let minutes = total_seconds / 60;
+            let seconds = total_seconds % 60;
+            format!("{:02}:{:02}", minutes, seconds)
+        } else {
+            "00:00".to_string()
+        }
+    }
+
     pub fn should_start_long_break(&self) -> bool {
         self.completed_sessions > 0 && 
         self.completed_sessions % self.settings.sessions_until_long_break == 0
