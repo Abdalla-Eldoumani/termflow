@@ -67,11 +67,18 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App, 
     loop {
         app.check_message_timeout();
         app.tick_timer(); // Update timer state
+        app.update_welcome_animation(); // Update welcome screen animation
         terminal.draw(|f| ui::draw(f, &app))?;
 
         if crossterm::event::poll(Duration::from_millis(250))? {
             if let Event::Key(key) = event::read()? {
                 if key.kind != KeyEventKind::Press {
+                    continue;
+                }
+                
+                // Dismiss welcome screen on any key press
+                if app.should_show_welcome() {
+                    app.dismiss_welcome();
                     continue;
                 }
                 
