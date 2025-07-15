@@ -59,6 +59,9 @@ pub fn draw(f: &mut Frame, app: &App) {
                 InputMode::Search => draw_search_popup(f, app),
                 InputMode::PomodoroTimer => draw_pomodoro_timer(f, app),
                 InputMode::TimeBlocking => draw_time_blocking_popup(f, app),
+                InputMode::SmartInsights => draw_smart_insights_dashboard(f, app),
+                InputMode::FocusMode => draw_focus_mode_interface(f, app),
+                InputMode::TaskDependencies => draw_task_dependencies_popup(f, app),
                 _ => {}
             }
         }
