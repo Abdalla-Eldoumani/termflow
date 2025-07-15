@@ -354,8 +354,8 @@ fn draw_pomodoro_timer(f: &mut Frame, app: &App) {
             );
         f.render_widget(motivation_widget, motivation_area);
     }
-}fn dra
-w_time_blocking_popup(f: &mut Frame, app: &App) {
+
+fn draw_time_blocking_popup(f: &mut Frame, app: &App) {
     let area = centered_rect(60, 40, f.size());
     
     let block = Block::default()
