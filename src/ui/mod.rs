@@ -666,7 +666,7 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
     };
 
     let key_hints = match app.input_mode {
-        InputMode::Normal => "[n]ew [s]tats [t]heme [e]xport [Space]toggle [d]elete [q]uit",
+        InputMode::Normal => "[n]ew [p]omodoro [T]ime-block [s]tats [t]heme [e]xport [Space]toggle [d]elete [q]uit",
         InputMode::Insert => "[Tab]category [Esc]cancel [Enter]save",
         InputMode::SelectCategory => "[Tab]cycle [Enter]select [Esc]cancel",
         InputMode::CreateCategory => "[Esc]cancel [Enter]next",
@@ -754,6 +754,223 @@ fn draw_input_popup(f: &mut Frame, app: &App) {
     if is_duplicate {
         f.render_widget(Paragraph::new(Line::from(hint)), chunks[1]);
     }
+}
+
+fn draw_pomodoro_timer(f: &mut Frame, app: &App) {
+    let area = centered_rect(70, 50, f.size());
+    
+    let (time_remaining, progress, session_name, is_running) = app.get_timer_display_info();
+    let (total_sessions, total_focus_time, today_sessions) = app.get_pomodoro_stats();
+    
+    let block = Block::default()
+        .title("🍅 Pomodoro Timer")
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
+        .border_style(Style::default().fg(Color::Red))
+        .style(Style::default().bg(Color::Black));
+    
+    let inner = block.inner(area);
+    f.render_widget(block, inner);
+    
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(3),  // Session type
+            Constraint::Length(5),  // Timer display
+            Constraint::Length(3),  // Progress bar
+            Constraint::Length(6),  // Stats
+            Constraint::Length(3),  // Controls
+        ])
+        .split(inner);
+    
+    // Session type and status
+    let status_text = if is_running {
+        if app.pomodoro_timer.is_paused {
+            format!("{} - PAUSED ⏸️", session_name)
+        } else {
+            format!("{} - RUNNING ⏰", session_name)
+        }
+    } else {
+        format!("{} - STOPPED ⏹️", session_name)
+    };
+    
+    let session_widget = Paragraph::new(status_text)
+        .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(session_widget, chunks[0]);
+    
+    // Large timer display
+    let timer_text = format!("⏰ {}", time_remaining);
+    let timer_widget = Paragraph::new(timer_text)
+        .style(Style::default().fg(Color::White).add_modifier(Modifier::BOLD))
+        .alignment(Alignment::Center);
+    f.render_widget(timer_widget, chunks[1]);
+    
+    // Progress bar
+    let progress_widget = Gauge::default()
+        .block(Block::default().title("Progress"))
+        .gauge_style(Style::default().fg(Color::Red).bg(Color::DarkGray))
+        .percent(progress as u16)
+        .label(format!("{}%", progress as u16));
+    f.render_widget(progress_widget, chunks[2]);
+    
+    // Statistics
+    let stats_chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(33),
+            Constraint::Percentage(33),
+            Constraint::Percentage(34),
+        ])
+        .split(chunks[3]);
+    
+    let stats = vec![
+        ("🎯 Total Sessions", total_sessions.to_string()),
+        ("⏱️ Focus Time", format!("{}min", total_focus_time)),
+        ("📅 Today", format!("{} sessions", today_sessions)),
+    ];
+    
+    for (i, (label, value)) in stats.iter().enumerate() {
+        let stat_widget = Paragraph::new(format!("{}\n{}", label, value))
+            .style(Style::default().fg(Color::Yellow))
+            .alignment(Alignment::Center)
+            .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+        f.render_widget(stat_widget, stats_chunks[i]);
+    }
+    
+    // Controls
+    let controls_text = if is_running {
+        "⏸️ [Space] Pause/Resume  |  ⏹️ [S] Stop  |  🚪 [Esc] Back"
+    } else {
+        "🚪 [Esc] Back to Tasks"
+    };
+    
+    let controls_widget = Paragraph::new(controls_text)
+        .style(Style::default().fg(Color::Gray))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(controls_widget, chunks[4]);
+    
+    // Show motivational message if timer is running
+    if is_running && !app.pomodoro_timer.is_paused {
+        let motivation = app.pomodoro_timer.get_motivational_message();
+        let motivation_area = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Percentage(80),
+                Constraint::Length(3),
+                Constraint::Percentage(20),
+            ])
+            .split(f.size())[1];
+        
+        let motivation_widget = Paragraph::new(motivation)
+            .style(Style::default().fg(Color::Green).add_modifier(Modifier::BOLD))
+            .alignment(Alignment::Center)
+            .block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Rounded)
+                    .border_style(Style::default().fg(Color::Green))
+            );
+        f.render_widget(motivation_widget, motivation_area);
+    }
+}
+
+fn draw_time_blocking_popup(f: &mut Frame, app: &App) {
+    let area = centered_rect(60, 40, f.size());
+    
+    let block = Block::default()
+        .title("⏰ Time Blocking")
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
+        .border_style(Style::default().fg(Color::Blue))
+        .style(Style::default().bg(Color::Black));
+    
+    let inner = block.inner(area);
+    f.render_widget(block, inner);
+    
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(3),  // Selected task
+            Constraint::Length(8),  // Duration options
+            Constraint::Length(6),  // Upcoming blocks
+            Constraint::Length(3),  // Instructions
+        ])
+        .split(inner);
+    
+    // Show selected task
+    let selected_task_text = if let Some(task) = app.get_selected_task() {
+        format!("📋 Selected Task: {}", task.title)
+    } else {
+        "⚠️ No task selected! Select a task first.".to_string()
+    };
+    
+    let task_widget = Paragraph::new(selected_task_text)
+        .style(Style::default().fg(Color::White))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(task_widget, chunks[0]);
+    
+    // Duration options
+    let options = vec![
+        ("1", "🍅 25 minutes", "Perfect for a Pomodoro session"),
+        ("2", "⚡ 45 minutes", "Deep focus session"),
+        ("3", "🎯 60 minutes", "Extended work block"),
+        ("4", "🚀 90 minutes", "Deep work marathon"),
+    ];
+    
+    let mut option_items = vec![
+        ListItem::new("Choose time block duration:").style(Style::default().add_modifier(Modifier::BOLD)),
+        ListItem::new(""),
+    ];
+    
+    for (key, duration, desc) in options {
+        let item = ListItem::new(Line::from(vec![
+            Span::styled(format!("[{}] ", key), Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::styled(duration, Style::default().fg(Color::Yellow)),
+            Span::raw(" - "),
+            Span::styled(desc, Style::default().fg(Color::Gray)),
+        ]));
+        option_items.push(item);
+    }
+    
+    let options_list = List::new(option_items)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(options_list, chunks[1]);
+    
+    // Upcoming time blocks
+    let upcoming_blocks = app.get_upcoming_time_blocks();
+    let mut block_items = vec![
+        ListItem::new("📅 Upcoming Time Blocks:").style(Style::default().add_modifier(Modifier::BOLD)),
+        ListItem::new(""),
+    ];
+    
+    if upcoming_blocks.is_empty() {
+        block_items.push(ListItem::new("No upcoming time blocks scheduled.").style(Style::default().fg(Color::Gray)));
+    } else {
+        for (task_title, time, duration) in upcoming_blocks {
+            let item = ListItem::new(Line::from(vec![
+                Span::styled(format!("{} ", time), Style::default().fg(Color::Cyan)),
+                Span::styled(format!("({}) ", duration), Style::default().fg(Color::Yellow)),
+                Span::raw(task_title),
+            ]));
+            block_items.push(item);
+        }
+    }
+    
+    let blocks_list = List::new(block_items)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(blocks_list, chunks[2]);
+    
+    // Instructions
+    let instructions = "Press number key to schedule time block | [Esc] Cancel";
+    let instructions_widget = Paragraph::new(instructions)
+        .style(Style::default().fg(Color::Gray))
+        .alignment(Alignment::Center)
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded));
+    f.render_widget(instructions_widget, chunks[3]);
 }
 
 pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
