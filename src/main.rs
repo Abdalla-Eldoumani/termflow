@@ -351,6 +351,8 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App, 
         }
 
         if app.should_quit {
+            // Status changes and deletes are not saved as they happen, so write everything on the way out.
+            app.save()?;
             return Ok(());
         }
     }
