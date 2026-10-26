@@ -66,7 +66,7 @@ Tasks, categories, stats and the chosen theme are stored as JSON in `termflow_da
 
 ## Limitations
 
-- Saving is incomplete. The file is written when you add a task (at most once every five seconds, so a task added within five seconds of launch is not saved) and when you change theme. Status changes, deletions, finished Pomodoros and time blocks are only kept if one of those saves happens afterwards, and quitting does not save.
+- The file is written when you add a task (at most once every five seconds), when you change theme, and when you quit with `q`. Closing the terminal or a crash loses any changes since the last save.
 - Dependencies are a placeholder: the view lists other tasks, but adding or removing a dependency only shows a message.
 - Focus mode only displays the selected task. The `P` shown in its footer is not wired up.
 - There is no way to set a task's priority, description or due date from the interface; every task is Medium.
